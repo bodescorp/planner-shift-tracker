@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -11,6 +12,7 @@
     <link rel="apple-touch-icon" href="src/assets/icon-192.svg">
     <link rel="stylesheet" href="src/css/style.css">
 </head>
+
 <body>
     <!-- Menu Lateral -->
     <nav class="side-menu" id="sideMenu">
@@ -96,6 +98,12 @@
                 <span class="water-badge" id="waterBadge">0 copos</span>
             </div>
         </header>
+
+        <!-- Seletor de Semanas (Desktop) -->
+        <div class="week-selector desktop-only">
+            <button class="week-btn active" data-week="A">📅 Semana A</button>
+            <button class="week-btn" data-week="B">📅 Semana B</button>
+        </div>
 
         <div class="days-container">
             <!-- Semana A -->
@@ -354,27 +362,37 @@
                 <div class="day-card" data-day="sabado-a">
                     <div class="day-header">
                         <h2>🟢 Sábado (Folga)</h2>
-                        <span class="progress">0/7</span>
+                        <span class="progress">0/10</span>
                     </div>
                     <div class="activities">
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-a">
-                            <span class="time">09:00-12:30</span>
-                            <span class="desc">🍳 Cozinhar Jantar da Semana + Feira</span>
+                            <span class="time">08:00</span>
+                            <span class="desc">Acordar</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-a">
-                            <span class="time">13:00-14:30</span>
+                            <span class="time">09:00-11:00</span>
+                            <span class="desc">🛒 Feira</span>
+                        </label>
+                        <label class="activity">
+                            <input type="checkbox" data-day="sabado-a">
+                            <span class="time">14:00-15:30</span>
                             <span class="desc">🎮 Game Dev</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-a">
-                            <span class="time">14:30-14:50</span>
+                            <span class="time">15:30-15:50</span>
                             <span class="desc">🌍 Inglês (Duolingo)</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-a">
-                            <span class="time">17:00-19:30</span>
+                            <span class="time">16:00-16:30</span>
+                            <span class="desc">📖 Leitura</span>
+                        </label>
+                        <label class="activity">
+                            <input type="checkbox" data-day="sabado-a">
+                            <span class="time">17:00-19:00</span>
                             <span class="desc">👨‍🍳 Cozinha Hobby</span>
                         </label>
                         <label class="activity">
@@ -398,33 +416,43 @@
                 <!-- Domingo -->
                 <div class="day-card" data-day="domingo-a">
                     <div class="day-header">
-                        <h2>🟢 Domingo (Descanso)</h2>
-                        <span class="progress">0/5</span>
+                        <h2>🔴 Domingo (Trabalho)</h2>
+                        <span class="progress">0/7</span>
                     </div>
                     <div class="activities">
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-a">
-                            <span class="time">10:00-11:00</span>
-                            <span class="desc">💆 Auriculoterapia</span>
+                            <span class="time">06:30</span>
+                            <span class="desc">Acordar</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-a">
-                            <span class="time">11:00-12:30</span>
-                            <span class="desc">🌍 Inglês (estudo focado)</span>
+                            <span class="time">08:00-20:00</span>
+                            <span class="desc">🏢 Trabalho Presencial</span>
+                        </label>
+                         <label class="activity optional">
+                            <input type="checkbox" data-day="domingo-a">
+                            <span class="time">20:30-21:00</span>
+                            <span class="desc">💆 Auriculoterapia (noite)</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-a">
-                            <span class="time">17:00-19:00</span>
+                            <span class="time">21:15-21:30</span>
+                            <span class="desc">🌍 Inglês (Duolingo)</span>
+                        </label>
+                        <label class="activity">
+                            <input type="checkbox" data-day="domingo-a">
+                            <span class="time">21:30-22:00</span>
                             <span class="desc">📖 Leitura</span>
                         </label>
-                        <label class="activity">
+                        <label class="activity optional">
                             <input type="checkbox" data-day="domingo-a">
-                            <span class="time">19:00-00:00</span>
-                            <span class="desc">🎮 Jogo </span>
+                            <span class="time">22:00-00:00</span>
+                            <span class="desc">🎮 Jogo</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-a">
-                            <span class="time">00:00-00:15</span>
+                            <span class="time">00:00-00:10</span>
                             <span class="desc">🧘 Meditação</span>
                         </label>
                     </div>
@@ -536,7 +564,7 @@
                 <!-- Quarta B -->
                 <div class="day-card" data-day="quarta-b">
                     <div class="day-header">
-                        <h2>🟢 Quarta-feira (Folga - Foco Entrega)</h2>
+                        <h2>🟢 Quarta-feira (Folga)</h2>
                         <span class="progress">0/8</span>
                     </div>
                     <div class="activities">
@@ -568,7 +596,7 @@
                         <label class="activity optional">
                             <input type="checkbox" data-day="quarta-b">
                             <span class="time">19:00-20:30</span>
-                            <span class="desc">🏀 Basquete (opcional)</span>
+                            <span class="desc">🏀 Basquete(IF)(opcional)</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="quarta-b">
@@ -596,7 +624,7 @@
                 <!-- Quinta B -->
                 <div class="day-card" data-day="quinta-b">
                     <div class="day-header">
-                        <h2>🔴 Quinta-feira (Trabalho - Entrega!) 🚀</h2>
+                        <h2>🔴 Quinta-feira (Trabalho) 🚀</h2>
                         <span class="progress">0/8</span>
                     </div>
                     <div class="activities">
@@ -607,7 +635,7 @@
                         </label>
                         <label class="activity critical">
                             <input type="checkbox" data-day="quinta-b">
-                            <span class="time">05:45-09:30</span>
+                            <span class="time">08:30-09:30</span>
                             <span class="desc">✅ ENTREGA REMOTA</span>
                         </label>
                         <label class="activity">
@@ -646,7 +674,7 @@
                 <!-- Sexta B -->
                 <div class="day-card" data-day="sexta-b">
                     <div class="day-header">
-                        <h2>🟢 Sexta-feira (Folga - Recuperação)</h2>
+                        <h2>🟢 Sexta-feira (Folga)</h2>
                         <span class="progress">0/9</span>
                     </div>
                     <div class="activities">
@@ -712,23 +740,23 @@
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-b">
+                            <span class="time">08:00-20:00</span>
+                            <span class="desc">🏢 Trabalho Presencial</span>
+                        </label>
+                        <label class="activity">
+                            <input type="checkbox" data-day="sabado-b">
                             <span class="time">20:40-21:00</span>
                             <span class="desc">🌍 Inglês (Duolingo)</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-b">
-                            <span class="time">08:00-20:00</span>
-                            <span class="desc">🏢 Trabalho Presencial</span>
+                            <span class="time">21:00-21:30</span>
+                            <span class="desc">📖 Leitura</span>
                         </label>
                         <label class="activity optional">
                             <input type="checkbox" data-day="sabado-b">
-                            <span class="time">20:40-21:40</span>
-                            <span class="desc">🎮 Bodescorp Live Curta (opcional)</span>
-                        </label>
-                        <label class="activity">
-                            <input type="checkbox" data-day="sabado-b">
-                            <span class="time">22:00-00:00</span>
-                            <span class="desc">🎮 Jogo </span>
+                            <span class="time">21:30-00:00</span>
+                            <span class="desc">🎮 Bodescorp Live </span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="sabado-b">
@@ -741,7 +769,7 @@
                 <!-- Domingo B -->
                 <div class="day-card" data-day="domingo-b">
                     <div class="day-header">
-                        <h2>🟢 Domingo (Descanso)</h2>
+                        <h2>🟢 Domingo (Folga)</h2>
                         <span class="progress">0/6</span>
                     </div>
                     <div class="activities">
@@ -757,25 +785,28 @@
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-b">
-                            <span class="time">12:30-14:00</span>
-                            <span class="desc">🍳 Cozinhar Jantar da Semana + Feira</span>
-                        </label>
-                        <label class="activity">
-                            <input type="checkbox" data-day="domingo-b">
                             <span class="time">17:00-19:00</span>
                             <span class="desc">📖 Leitura</span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-b">
-                            <span class="time">19:00-00:00</span>
+                            <span class="time">19:00-21:00</span>
+                            <span class="desc">👨‍🍳 Cozinha Hobby</span>
+                        </label>
+                        <label class="activity">
+                            <input type="checkbox" data-day="domingo-b">
+                            <span class="time">21:00-00:00</span>
                             <span class="desc">🎮 Jogo </span>
                         </label>
                         <label class="activity">
                             <input type="checkbox" data-day="domingo-b">
                             <span class="time">00:00-00:15</span>
+                            <span class="desc">🧘 Meditação</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        
     </div>
 
     <!-- Modal de Água -->
@@ -807,6 +838,8 @@
             </div>
         </div>
     </div>
-    <script src="src/js/app.js"></script>
+
+    <script type="module" src="src/js/app.js"></script>
 </body>
+
 </html>

@@ -5,10 +5,37 @@ Sistema de gerenciamento de plantão 12x36 com rastreamento de atividades e hidr
 ## Características
 
 - **Sistema Automático**: Configure uma vez e o sistema alterna automaticamente entre plantão e folga
+- **Carregamento Automático**: Todas as configurações são salvas no localStorage e carregadas automaticamente ao abrir a aplicação
+- **Persistência Total**: Checkboxes, configurações de plantão, histórico de água - tudo é salvo automaticamente
 - **PWA**: Funciona offline como um aplicativo instalável
 - **Rastreamento de Água**: Lembretes periódicos para hidratação
 - **Relatórios**: Estatísticas semanais de atividades e consumo de água
 - **Design Minimalista**: Interface limpa e profissional
+
+## Como Funciona o Sistema de Cache/LocalStorage
+
+A aplicação utiliza o **localStorage** do navegador para persistir todas as informações:
+
+### Dados Salvos Automaticamente:
+- ✅ **Configuração de Plantão**: Data inicial e ciclo 12x36
+- ✅ **Estado dos Checkboxes**: Todas as atividades marcadas
+- ✅ **Histórico de Água**: Registro diário de consumo
+- ✅ **Relatórios Semanais**: Estatísticas e progresso
+- ✅ **Preferências**: Visualização mobile, última limpeza, etc.
+
+### Carregamento Automático:
+Ao abrir a aplicação, ela automaticamente:
+1. 🔍 Verifica se existe configuração salva no localStorage
+2. 📅 Detecta se hoje é plantão ou folga baseado na data inicial
+3. ✨ Restaura todos os checkboxes e configurações
+4. 💧 Mostra o contador de água do dia
+5. 📊 Atualiza os indicadores e relatórios
+
+### Primeira Configuração:
+Se é a primeira vez usando a aplicação:
+1. Um diálogo aparecerá perguntando: "Você está trabalhando hoje?"
+2. Após responder, o sistema salva automaticamente no localStorage
+3. Nas próximas aberturas, tudo será carregado automaticamente!
 
 ## Estrutura do Projeto
 
@@ -73,6 +100,34 @@ Acesse todas as funcionalidades pelo menu hambúrguer (☰):
 - Firefox 88+
 - Safari 14+
 - Mobile (iOS/Android)
+
+## Troubleshooting
+
+### A aplicação não está carregando minhas configurações
+1. Verifique se está usando o mesmo navegador
+2. Certifique-se de que o localStorage não foi limpo
+3. Abra o console do navegador (F12) e veja os logs de carregamento
+4. Você verá mensagens como: `✅ Configuração carregada automaticamente do localStorage`
+
+### Como resetar tudo
+Se quiser começar do zero:
+1. Abra o console do navegador (F12)
+2. Digite: `localStorage.clear()`
+3. Recarregue a página (F5)
+
+### Ver dados salvos no localStorage
+No console do navegador:
+```javascript
+// Ver configuração de plantão
+console.log(localStorage.getItem('cycleStartDate'))
+console.log(localStorage.getItem('currentWeek'))
+
+// Ver checkboxes salvos
+console.log(JSON.parse(localStorage.getItem('checkboxes')))
+
+// Ver histórico de água
+console.log(JSON.parse(localStorage.getItem('waterData')))
+```
 
 ## Licença
 

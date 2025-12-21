@@ -403,32 +403,43 @@ h1 {
 }
 
 .week-selector {
-    display: flex;
+    display: none; /* Oculto no mobile por padrão */
     gap: 10px;
     justify-content: center;
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.desktop-only {
+    display: none;
 }
 
 .week-btn {
-    padding: 12px 30px;
-    background: #1a1a1a;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
     border: 2px solid #333;
     color: #888;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .week-btn:hover {
     border-color: #555;
-    color: #aaa;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .week-btn.active {
-    background: #2563eb;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     border-color: #2563eb;
     color: #fff;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
 }
 
 .water-btn {
@@ -969,5 +980,13 @@ h1 {
     
     .header-info {
         margin-bottom: 20px;
+    }
+
+    .desktop-only {
+        display: flex !important;
+    }
+
+    .week-selector {
+        display: flex;
     }
 }
