@@ -4,7 +4,7 @@
 
 import { 
     menuToggle, sideMenu, menuOverlay, menuClose, menuReportBtn, 
-    menuResetBtn, menuWaterBtn, menuConfirmBtn, menuViewToggleBtn,
+    menuResetBtn, menuResetAppBtn, menuWaterBtn, menuConfirmBtn, menuViewToggleBtn,
     viewToggleText, menuWeekIndicator, menuWaterCount, reportModal, waterModal
 } from './dom-elements.js';
 import { generateReport } from './reports.js';
@@ -33,6 +33,34 @@ export function updateMenuIndicators() {
         menuWeekIndicator.textContent = `Semana ${currentWeek}`;
     }
     if (menuWaterCount) menuWaterCount.textContent = todayWater;
+}
+
+function resetApplication() {
+    // Limpar localStorage
+    localStorage.clear();
+    
+    // Limpar cache do Service Worker
+    if ('caches' in window) {
+        caches.keys().then(names => {
+            names.forEach(name => {
+                caches.delete(name);
+            });
+        });
+    }
+    
+    // Desregistrar Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+                registration.unregister();
+            });
+        });
+    }
+    
+    // Recarregar página após um pequeno delay
+    setTimeout(() => {
+        window.location.reload(true);
+    }, 500);
 }
 
 export function initMenu() {
@@ -64,6 +92,15 @@ export function initMenu() {
         menuResetBtn.addEventListener('click', () => {
             closeMenu();
             setTimeout(() => resetCurrentDay(), 300);
+        });
+    }
+
+    if (menuResetAppBtn) {
+        menuResetAppBtn.addEventListener('click', () => {
+            if (confirm('⚠️ Isso irá limpar TODOS os dados e resetar a aplicação. Tem certeza?')) {
+                closeMenu();
+                resetApplication();
+            }
         });
     }
 

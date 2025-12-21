@@ -18,6 +18,8 @@ import {
 import { startWeeklyCleanupMonitor, checkAndClearWeeklyData } from './modules/weekly-cleanup.js';
 import { initReports, initKeyboardShortcuts } from './modules/reports.js';
 import { registerServiceWorker } from './modules/service-worker-register.js';
+import { initTabsManager } from './modules/tabs-manager.js';
+import { initMeditationPlayer } from './modules/meditation-player.js';
 
 // ========================================
 // INICIALIZAÇÃO
@@ -45,6 +47,8 @@ initActivities();
 initWaterNotifications();
 initReports();
 initKeyboardShortcuts();
+initTabsManager();
+initMeditationPlayer();
 registerServiceWorker();
 
 // Carregar estado da aplicação

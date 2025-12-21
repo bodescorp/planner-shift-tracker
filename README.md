@@ -1,133 +1,107 @@
-# Cronograma
+# Planner Shift Tracker
 
-Sistema de gerenciamento de plantão 12x36 com rastreamento de atividades e hidratação.
+Um planejador de rotina para escalas 12x36 que vai além do básico. Construído para resolver o problema real de gerenciar uma rotina complexa com trabalho, estudos, hobbies e autocuidado.
 
-## Características
+## Por que este projeto?
 
-- **Sistema Automático**: Configure uma vez e o sistema alterna automaticamente entre plantão e folga
-- **Carregamento Automático**: Todas as configurações são salvas no localStorage e carregadas automaticamente ao abrir a aplicação
-- **Persistência Total**: Checkboxes, configurações de plantão, histórico de água - tudo é salvo automaticamente
-- **PWA**: Funciona offline como um aplicativo instalável
-- **Rastreamento de Água**: Lembretes periódicos para hidratação
-- **Relatórios**: Estatísticas semanais de atividades e consumo de água
-- **Design Minimalista**: Interface limpa e profissional
+Trabalhar em escala 12x36 é desafiador. Os dias alternam entre trabalho intenso e folga, cada um com sua própria lista de atividades. Eu precisava de algo que:
 
-## Como Funciona o Sistema de Cache/LocalStorage
+- **Calculasse automaticamente** qual tipo de dia é hoje (Semana A ou B)
+- **Adaptasse as atividades** para o contexto do dia (trabalho vs. folga)
+- **Lembrasse de beber água** durante o expediente
+- **Funcionasse no celular** como um app nativo
+- **Não dependesse de servidor** - tudo local e privado
 
-A aplicação utiliza o **localStorage** do navegador para persistir todas as informações:
+## O que tem aqui
 
-### Dados Salvos Automaticamente:
-- ✅ **Configuração de Plantão**: Data inicial e ciclo 12x36
-- ✅ **Estado dos Checkboxes**: Todas as atividades marcadas
-- ✅ **Histórico de Água**: Registro diário de consumo
-- ✅ **Relatórios Semanais**: Estatísticas e progresso
-- ✅ **Preferências**: Visualização mobile, última limpeza, etc.
+### Sistema de Escala Inteligente
+O app detecta automaticamente se você está na Semana A ou B baseado na data inicial. Cada semana tem uma configuração diferente de dias de trabalho/folga e atividades específicas.
 
-### Carregamento Automático:
-Ao abrir a aplicação, ela automaticamente:
-1. 🔍 Verifica se existe configuração salva no localStorage
-2. 📅 Detecta se hoje é plantão ou folga baseado na data inicial
-3. ✨ Restaura todos os checkboxes e configurações
-4. 💧 Mostra o contador de água do dia
-5. 📊 Atualiza os indicadores e relatórios
+### Player de Meditação
+Interface tabbed no mobile com 8 áudios que rotacionam automaticamente - 1 por dia. Simples e eficiente.
 
-### Primeira Configuração:
-Se é a primeira vez usando a aplicação:
-1. Um diálogo aparecerá perguntando: "Você está trabalhando hoje?"
-2. Após responder, o sistema salva automaticamente no localStorage
-3. Nas próximas aberturas, tudo será carregado automaticamente!
+### Bloco de Notas
+Porque às vezes você só precisa anotar algo rápido sem sair do app.
 
-## Estrutura do Projeto
+### Relatórios Automáticos
+Veja seu progresso semanal: quantas atividades completou, quantos copos de água bebeu, quantas vezes foi na academia.
+
+### PWA Completo
+Instale como app, funcione offline, notificações de água - experiência mobile nativa com web tech.
+
+## Stack
+
+**Frontend Puro**
+- HTML5 semântico
+- CSS3 com gradientes e animações
+- Vanilla JavaScript com ES6 modules
+
+**Arquitetura**
+- Sistema modular (9 módulos separados)
+- localStorage para persistência
+- Service Worker para PWA
+- Sem frameworks, sem bundlers, sem complexidade desnecessária
+
+**Funcionalidades**
+- Audio API para o player
+- Notification API para lembretes
+- Responsive design (desktop e mobile têm interfaces diferentes)
+- SPA com navegação por tabs no mobile
+
+## Como funciona
 
 ```
-planer_hor/
-├── index.html              # Página principal
-├── manifest.json           # Configuração PWA
-├── src/
-│   ├── css/
-│   │   └── style.css       # Estilos
-│   ├── js/
-│   │   ├── app.js          # Lógica principal
-│   │   └── sw.js           # Service Worker
-│   └── assets/
-│       ├── icon-192.svg    # Ícone PWA
-│       └── icon-512.svg    # Ícone PWA
-└── docs/                   # Documentação
+src/
+├── js/
+│   ├── app.js                    # Entry point
+│   └── modules/
+│       ├── activities.js         # Gerencia atividades e checkboxes
+│       ├── cycle-system.js       # Lógica da escala 12x36
+│       ├── dom-elements.js       # Referências DOM
+│       ├── menu.js               # Menu lateral
+│       ├── mobile-view.js        # Views mobile
+│       ├── notifications.js      # Lembretes de água
+│       ├── reports.js            # Estatísticas semanais
+│       ├── tabs-manager.js       # Navegação entre abas
+│       └── meditation-player.js  # Player de áudio
 ```
 
-## Instalação
+**Cada módulo** tem uma responsabilidade única. Nada de god objects ou código espaguete.
 
-1. Clone o repositório
-2. Sirva os arquivos com um servidor HTTP:
-   ```bash
-   python3 -m http.server 8000
-   ```
-3. Acesse `http://localhost:8000`
-4. No primeiro acesso, confirme se está em plantão ou folga
+## Destaques técnicos
 
-## Uso
+**Cálculo de Escala**  
+O sistema calcula dinamicamente qual semana você está (A ou B) baseado na data inicial. Cada semana tem um padrão diferente de dias de trabalho.
 
-### Configuração Inicial
+**Persistência Inteligente**  
+Tudo é salvo no localStorage: checkboxes, histórico de água, última música tocada, notas. Quando você volta, está tudo lá.
 
-Na primeira execução, o sistema perguntará se você está trabalhando hoje. Após confirmar, o sistema calculará automaticamente os próximos dias.
+**Audio Rotation**  
+O player seleciona o áudio do dia usando `(dayOfYear % 8) + 1`. Simples e previsível.
 
-### Menu
+**SPA sem Framework**  
+Interface tabbed no mobile com 3 páginas (Cronograma, Meditação, Notas) usando apenas CSS positioning e JavaScript puro.
 
-Acesse todas as funcionalidades pelo menu hambúrguer (☰):
-- **Configurar Plantão**: Reconfigurar o ciclo se necessário
-- **Registrar Água**: Marcar consumo de água
-- **Ver Todos os Dias**: Alternar visualização (mobile)
-- **Relatório**: Ver estatísticas semanais
-- **Limpar Hoje**: Resetar atividades do dia
+**Auto-reset à Meia-noite**  
+Worker que detecta mudança de dia e reseta atividades automaticamente.
 
-### Atalhos
+## Rodando localmente
 
-- Marque checkboxes para completar atividades
-- O progresso é salvo automaticamente
-- Sistema atualiza sozinho à meia-noite
+```bash
+# Qualquer servidor HTTP serve
+python3 -m http.server 8000
 
-## Tecnologias
+# Ou use o Live Server do VS Code
+```
 
-- HTML5
-- CSS3 (design minimalista)
-- JavaScript (Vanilla)
-- PWA (Service Worker + Manifest)
-- LocalStorage (persistência de dados)
+Acesse `http://localhost:8000` e configure sua escala no primeiro uso.
+## Requisitos
 
-## Compatibilidade
 
-- Chrome/Edge 90+
-- Firefox 88+
+**Feito com JavaScript puro** porque nem tudo precisa de um framework.
 - Safari 14+
 - Mobile (iOS/Android)
-
-## Troubleshooting
-
-### A aplicação não está carregando minhas configurações
-1. Verifique se está usando o mesmo navegador
-2. Certifique-se de que o localStorage não foi limpo
-3. Abra o console do navegador (F12) e veja os logs de carregamento
-4. Você verá mensagens como: `✅ Configuração carregada automaticamente do localStorage`
-
-### Como resetar tudo
-Se quiser começar do zero:
-1. Abra o console do navegador (F12)
-2. Digite: `localStorage.clear()`
-3. Recarregue a página (F5)
-
-### Ver dados salvos no localStorage
-No console do navegador:
-```javascript
-// Ver configuração de plantão
-console.log(localStorage.getItem('cycleStartDate'))
-console.log(localStorage.getItem('currentWeek'))
-
-// Ver checkboxes salvos
-console.log(JSON.parse(localStorage.getItem('checkboxes')))
-
-// Ver histórico de água
-console.log(JSON.parse(localStorage.getItem('waterData')))
-```
+- Desktop (Chrome, Firefox, Edge)
 
 ## Licença
 

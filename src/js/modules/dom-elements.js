@@ -20,6 +20,7 @@ export const menuOverlay = document.getElementById('menuOverlay');
 export const menuClose = document.getElementById('menuClose');
 export const menuReportBtn = document.getElementById('menuReportBtn');
 export const menuResetBtn = document.getElementById('menuResetBtn');
+export const menuResetAppBtn = document.getElementById('menuResetAppBtn');
 export const menuWaterBtn = document.getElementById('menuWaterBtn');
 export const menuConfirmBtn = document.getElementById('menuConfirmBtn');
 export const menuViewToggleBtn = document.getElementById('menuViewToggleBtn');

@@ -53,6 +53,12 @@
                     <span class="menu-text">Limpar Dia Atual</span>
                 </button>
             </li>
+            <li>
+                <button class="menu-item menu-item-danger" id="menuResetAppBtn">
+                    <span class="menu-icon">⚠️</span>
+                    <span class="menu-text">Resetar Aplicação</span>
+                </button>
+            </li>
             <li class="menu-divider"></li>
             <li class="menu-info-group">
                 <div class="menu-info">
@@ -105,7 +111,9 @@
             <button class="week-btn" data-week="B">📅 Semana B</button>
         </div>
 
-        <div class="days-container">
+        <!-- Container Principal (visível apenas no mobile quando aba cronograma ativa) -->
+        <div class="main-content" id="mainContent">
+            <div class="days-container">
             <!-- Semana A -->
             <div class="week-content active" id="semana-a">
                 <!-- Segunda -->
@@ -807,6 +815,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Modal de Água -->
@@ -836,6 +845,24 @@
             <div class="modal-body" id="reportContent">
                 <!-- Conteúdo gerado dinamicamente -->
             </div>
+        </div>
+    </div>
+
+    <!-- Menu Inferior com Abas (Mobile) -->
+    <div class="bottom-tabs mobile-only" id="bottomTabs">
+        <div class="tabs-header">
+            <button class="tab-btn active" data-tab="schedule">
+                <span class="tab-icon">📅</span>
+                <span class="tab-label">Cronograma</span>
+            </button>
+            <button class="tab-btn" data-tab="meditation">
+                <span class="tab-icon">🧘</span>
+                <span class="tab-label">Meditação</span>
+            </button>
+            <button class="tab-btn" data-tab="notes">
+                <span class="tab-icon">📝</span>
+                <span class="tab-label">Notas</span>
+            </button>
         </div>
     </div>
 
