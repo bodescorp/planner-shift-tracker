@@ -286,6 +286,18 @@ export class Pet3DRenderer {
             this.animationId = null;
         }
         
+        // Cancelar transições pendentes
+        if (this.pendingTransition) {
+            clearTimeout(this.pendingTransition);
+            this.pendingTransition = null;
+        }
+        
+        // Limpar timeouts de fade
+        if (this.fadeTimeouts) {
+            this.fadeTimeouts.forEach(timeout => clearTimeout(timeout));
+            this.fadeTimeouts = [];
+        }
+        
         // Remover event listener de clique
         if (this.clickHandler && this.renderer && this.renderer.domElement) {
             this.renderer.domElement.removeEventListener('click', this.clickHandler);
@@ -311,40 +323,6 @@ export class Pet3DRenderer {
         }
     }
 
-    setEmotionEffect(emotion) {
-        if (!this.model) return;
-        
-        switch(emotion) {
-            case 'happy':
-                // Bounce effect
-                if (!this.bounceAnimation) {
-                    this.bounceAnimation = setInterval(() => {
-                        if (this.model) {
-                            this.model.position.y = Math.sin(Date.now() * 0.005) * 0.1;
-                        }
-                    }, 16);
-                }
-                break;
-            case 'excited':
-                // Shake effect
-                this.stopAutoRotate();
-                if (this.model) {
-                    this.model.rotation.y += 0.5;
-                }
-                setTimeout(() => this.startAutoRotate(), 2000);
-                break;
-            default:
-                // Clear effects
-                if (this.bounceAnimation) {
-                    clearInterval(this.bounceAnimation);
-                    this.bounceAnimation = null;
-                    if (this.model) {
-                        this.model.position.y = 0;
-                    }
-                }
-        }
-    }
-
     getAnimations() {
         return this.animations || [];
     }
@@ -367,6 +345,12 @@ export class Pet3DRenderer {
     playAnimation(index, loopMode = 'once', skipIdle = false) {
         if (!this.currentActions || index >= this.currentActions.length || index < 0) return;
         
+        // Cancelar qualquer transição pendente
+        if (this.pendingTransition) {
+            clearTimeout(this.pendingTransition);
+            this.pendingTransition = null;
+        }
+        
         // Verificar se há alguma animação rodando
         const hasRunningAnimation = this.currentActions.some((action, i) => 
             action.isRunning() && i !== index
@@ -378,8 +362,9 @@ export class Pet3DRenderer {
             this.playAnimationDirect(this.idleInIndex, 'once');
             
             // Após um curto período, ir para a animação desejada
-            setTimeout(() => {
+            this.pendingTransition = setTimeout(() => {
                 this.playAnimationDirect(index, loopMode);
+                this.pendingTransition = null;
             }, 300); // Pequeno delay para mostrar o idle_In
         } else {
             // Ir direto para a animação (sem transição por idle_In)
@@ -399,22 +384,30 @@ export class Pet3DRenderer {
             this.model.quaternion.copy(this.initialQuaternion);
         }
         
-        // Fazer fadeOut e parar as outras animações após o fade
+        // Limpar timeouts anteriores de fade
+        if (this.fadeTimeouts) {
+            this.fadeTimeouts.forEach(timeout => clearTimeout(timeout));
+        }
+        this.fadeTimeouts = [];
+        
+        // Parar imediatamente todas as outras animações e limpar seus estados
         this.currentActions.forEach((action, i) => {
-            if (i !== index && action.isRunning()) {
-                action.fadeOut(this.fadeDuration);
-                // Parar a animação após o fade completar
-                setTimeout(() => {
-                    action.stop();
-                }, this.fadeDuration * 1000);
+            if (i !== index) {
+                action.stop();
+                action.reset();
+                action.setEffectiveWeight(0);
+                action.enabled = true;
             }
         });
         
-        // Configurar a nova animação
+        // Configurar a nova animação completamente do zero
+        newAction.reset();
         newAction.stop();
+        newAction.enabled = true;
+        newAction.setEffectiveWeight(1);
         newAction.time = 0;
         newAction.timeScale = this.animationSpeed;
-        newAction.setEffectiveWeight(1);
+        newAction.paused = false;
         
         // Configurar loop baseado no parâmetro
         if (loopMode === 'repeat') {
