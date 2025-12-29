@@ -78,8 +78,8 @@ class PetSystem {
             modelType: '3d',
             model3DPath: 'src/assets/ornn.glb',
             animationSettings: {
-                default: 0,
-                onTaskComplete: 0,
+                default: -1,
+                onTaskComplete: -1,
                 onLevelUp: -1,
                 onPassive: -1,
                 onQ: -1,
@@ -125,7 +125,7 @@ class PetSystem {
         
         // Reproduzir animação de level up
         const animIndex = this.data.animationSettings?.onLevelUp;
-        const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
+        const defaultAnimIndex = this.data.animationSettings?.default ?? -1;
         
         if (animIndex !== undefined && animIndex >= 0 && this.renderer3D) {
             this.renderer3D.playAnimation(animIndex);
@@ -163,7 +163,7 @@ class PetSystem {
         
         // Reproduzir animação configurada
         const animIndex = this.data.animationSettings?.onTaskComplete;
-        const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
+        const defaultAnimIndex = this.data.animationSettings?.default ?? -1;
         
         if (animIndex !== undefined && animIndex >= 0 && this.renderer3D) {
             // Animar na aba do mascote
@@ -215,7 +215,7 @@ class PetSystem {
         if (animIndex < 0) return;
         
         this.isPlayingClickAnimation = true;
-        const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
+        const defaultAnimIndex = this.data.animationSettings?.default ?? -1;
         
         // Limpar timeouts anteriores
         if (this.clickAnimTimeout) {
@@ -303,7 +303,7 @@ class PetSystem {
         // Reproduzir animação configurada
         if (this.renderer3D && this.is3DModel) {
             const animIndex = this.data.animationSettings?.[animKey];
-            const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
+            const defaultAnimIndex = this.data.animationSettings?.default ?? -1;
             const animations = this.renderer3D.getAnimations();
             
             // Se tem animação configurada para esta habilidade
@@ -531,12 +531,13 @@ class PetSystem {
                 petCharacter.classList.add('model-3d');
                 
                 // Aplicar animação padrão se configurada
-                const defaultAnim = this.data.animationSettings?.default ?? 0;
+                const defaultAnim = this.data.animationSettings?.default ?? -1;
                 if (defaultAnim >= 0) {
                     setTimeout(() => {
-                        this.renderer3D.playAnimation(defaultAnim);
+                        this.renderer3D.playAnimation(defaultAnim, 'repeat');
                     }, 100);
                 }
+                // Se defaultAnim é -1, fica na T-pose (sem animação)
                 
                 // Atualizar lista de animações
                 this.updateAnimationsList();
@@ -930,17 +931,18 @@ export function initMainPetWidget() {
         });
         
         // Definir animação padrão antes de carregar
-        miniRenderer.defaultAnimIndex = petSystem.data.animationSettings?.default ?? 0;
+        miniRenderer.defaultAnimIndex = petSystem.data.animationSettings?.default ?? -1;
         
         miniRenderer.init().then(() => {
             miniRenderer.loadModel('src/assets/ornn.glb').then(() => {
-                // Aplicar animação padrão após carregar
-                const defaultAnim = petSystem.data.animationSettings?.default ?? 0;
+                // Aplicar animação padrão após carregar (se configurada)
+                const defaultAnim = petSystem.data.animationSettings?.default ?? -1;
                 if (defaultAnim >= 0) {
                     setTimeout(() => {
                         miniRenderer.playAnimation(defaultAnim, 'repeat');
                     }, 100);
                 }
+                // Se defaultAnim é -1, fica na T-pose (sem animação)
             }).catch(() => {});
         }).catch(() => {});
         

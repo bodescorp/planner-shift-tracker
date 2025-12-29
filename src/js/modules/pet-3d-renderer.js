@@ -168,23 +168,14 @@ export class Pet3DRenderer {
                             this.animations = gltf.animations;
                             this.currentActions = [];
                             
-                            // Guardar referência às ações
+                            // Guardar referência às ações (mas NÃO reproduzir nada automaticamente)
                             this.animations.forEach((clip) => {
                                 const action = this.mixer.clipAction(clip);
                                 this.currentActions.push(action);
                             });
                             
-                            // Reproduzir animação padrão se configurada
-                            if (this.defaultAnimIndex !== undefined && this.defaultAnimIndex >= 0 && this.currentActions[this.defaultAnimIndex]) {
-                                const defaultAction = this.currentActions[this.defaultAnimIndex];
-                                defaultAction.setLoop(THREE.LoopRepeat);
-                                defaultAction.play();
-                            } else if (this.currentActions.length > 0) {
-                                // Caso contrário, reproduzir primeira animação em loop
-                                const firstAction = this.currentActions[0];
-                                firstAction.setLoop(THREE.LoopRepeat);
-                                firstAction.play();
-                            }
+                            // NÃO reproduzir animação automaticamente aqui
+                            // A animação padrão será definida externamente via playAnimation()
                         }
                         
                         // Iniciar loop de animação
@@ -358,29 +349,33 @@ export class Pet3DRenderer {
     playAnimation(index, loopMode = 'once') {
         if (!this.currentActions || index >= this.currentActions.length || index < 0) return;
         
-        // Parar todas as animações com fade
-        this.currentActions.forEach(action => {
-            action.fadeOut(this.fadeDuration);
+        const newAction = this.currentActions[index];
+        
+        // Parar todas as outras animações (exceto a nova)
+        this.currentActions.forEach((action, i) => {
+            if (i !== index && action.isRunning()) {
+                action.fadeOut(this.fadeDuration);
+            }
         });
         
-        // Reproduzir animação selecionada
-        setTimeout(() => {
-            const action = this.currentActions[index];
-            action.reset();
-            action.timeScale = this.animationSpeed; // Aplicar velocidade
-            
-            // Configurar loop baseado no parâmetro
-            if (loopMode === 'repeat') {
-                action.setLoop(THREE.LoopRepeat);
-                action.clampWhenFinished = false;
-            } else {
-                action.setLoop(THREE.LoopOnce);
-                action.clampWhenFinished = true;
-            }
-            
-            action.fadeIn(this.fadeDuration);
-            action.play();
-        }, this.fadeDuration * 1000);
+        // Configurar e reproduzir a nova animação imediatamente
+        newAction.stop();
+        newAction.time = 0;
+        newAction.timeScale = this.animationSpeed;
+        
+        // Configurar loop baseado no parâmetro
+        if (loopMode === 'repeat') {
+            newAction.setLoop(THREE.LoopRepeat);
+            newAction.clampWhenFinished = false;
+        } else {
+            newAction.setLoop(THREE.LoopOnce);
+            newAction.clampWhenFinished = true;
+        }
+        
+        // Iniciar com fadeIn para transição suave
+        newAction.reset();
+        newAction.fadeIn(this.fadeDuration);
+        newAction.play();
     }
 
     setFadeDuration(duration) {
