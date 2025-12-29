@@ -1,13 +1,13 @@
 // Service Worker para PWA
 const CACHE_NAME = 'cronograma-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/src/css/style.css',
-  '/src/js/app.js',
-  '/manifest.json',
-  '/src/assets/icon-192.svg',
-  '/src/assets/icon-512.svg'
+  './',
+  './index.html',
+  './src/css/style.css',
+  './src/js/app.js',
+  './manifest.json',
+  './src/assets/icon-192.svg',
+  './src/assets/icon-512.svg'
 ];
 
 // Instalar Service Worker e cachear recursos
