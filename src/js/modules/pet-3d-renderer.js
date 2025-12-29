@@ -164,6 +164,11 @@ export class Pet3DRenderer {
                             -center.z * scale
                         );
                         
+                        // Guardar posição e rotação inicial para resetar entre animações
+                        this.initialPosition = this.model.position.clone();
+                        this.initialRotation = this.model.rotation.clone();
+                        this.initialQuaternion = this.model.quaternion.clone();
+                        
                         // Adicionar à cena
                         this.scene.add(this.model);
                         
@@ -174,15 +179,19 @@ export class Pet3DRenderer {
                             this.currentActions = [];
                             
                             // Guardar referência às ações (mas NÃO reproduzir nada automaticamente)
-                            this.animations.forEach((clip) => {
+                            this.animations.forEach((clip, index) => {
                                 const action = this.mixer.clipAction(clip);
                                 this.currentActions.push(action);
+                                
+                                // Encontrar a animação idle_In para usar como base nas transições
+                                if (clip.name === 'idle_In') {
+                                    this.idleInIndex = index;
+                                }
                             });
                             
                             // NÃO reproduzir animação automaticamente aqui
-                            // A animação padrão será definida externamente via playAnimation()                            
-                            // Remover texto de carregamento quando animações carregam
-                            this.hideLoadingText();                            
+                            // A animação padrão será definida externamente via playAnimation()
+                            
                             // Remover texto de carregamento quando animações carregam
                             this.hideLoadingText();
                         }
@@ -355,16 +364,57 @@ export class Pet3DRenderer {
         }
     }
 
-    playAnimation(index, loopMode = 'once') {
+    playAnimation(index, loopMode = 'once', skipIdle = false) {
+        if (!this.currentActions || index >= this.currentActions.length || index < 0) return;
+        
+        // Verificar se há alguma animação rodando
+        const hasRunningAnimation = this.currentActions.some((action, i) => 
+            action.isRunning() && i !== index
+        );
+        
+        // Se há animação rodando, tem idle_In definido, não está pulando idle e não é a própria idle_In
+        if (hasRunningAnimation && this.idleInIndex !== undefined && !skipIdle && index !== this.idleInIndex) {
+            // Fazer transição através do idle_In
+            this.playAnimationDirect(this.idleInIndex, 'once');
+            
+            // Após um curto período, ir para a animação desejada
+            setTimeout(() => {
+                this.playAnimationDirect(index, loopMode);
+            }, 300); // Pequeno delay para mostrar o idle_In
+        } else {
+            // Ir direto para a animação (sem transição por idle_In)
+            this.playAnimationDirect(index, loopMode);
+        }
+    }
+    
+    playAnimationDirect(index, loopMode = 'once') {
         if (!this.currentActions || index >= this.currentActions.length || index < 0) return;
         
         const newAction = this.currentActions[index];
         
-        // Parar todas as outras animações (exceto a nova)
-        // Configurar a nova animação primeiro
+        // Resetar posição e rotação do modelo para a posição inicial
+        if (this.model && this.initialPosition) {
+            this.model.position.copy(this.initialPosition);
+            this.model.rotation.copy(this.initialRotation);
+            this.model.quaternion.copy(this.initialQuaternion);
+        }
+        
+        // Fazer fadeOut e parar as outras animações após o fade
+        this.currentActions.forEach((action, i) => {
+            if (i !== index && action.isRunning()) {
+                action.fadeOut(this.fadeDuration);
+                // Parar a animação após o fade completar
+                setTimeout(() => {
+                    action.stop();
+                }, this.fadeDuration * 1000);
+            }
+        });
+        
+        // Configurar a nova animação
         newAction.stop();
         newAction.time = 0;
         newAction.timeScale = this.animationSpeed;
+        newAction.setEffectiveWeight(1);
         
         // Configurar loop baseado no parâmetro
         if (loopMode === 'repeat') {
@@ -375,15 +425,7 @@ export class Pet3DRenderer {
             newAction.clampWhenFinished = true;
         }
         
-        // Fazer fadeOut apenas das outras animações em execução
-        this.currentActions.forEach((action, i) => {
-            if (i !== index && action.isRunning()) {
-                action.fadeOut(this.fadeDuration);
-            }
-        });
-        
-        // Iniciar a nova animação com peso completo (fadeIn com duração 0) ou pequeno fade
-        newAction.setEffectiveWeight(1);
+        // Iniciar a nova animação imediatamente
         newAction.play();
     }
 
