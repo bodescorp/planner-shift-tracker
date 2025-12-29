@@ -10,6 +10,7 @@ import { updateDayView } from './mobile-view.js';
 import { updateMenuIndicators } from './menu.js';
 import { saveWeeklyReport } from './reports.js';
 import { getDayName } from './utils.js';
+import { notifyActivityCompleted } from './pet-system.js';
 
 export function loadState() {
     const savedStartDate = localStorage.getItem('cycleStartDate');
@@ -149,6 +150,11 @@ export function initActivities() {
             const dayCard = checkbox.closest('.day-card');
             updateProgress(dayCard);
             saveCheckboxState();
+            
+            // Notificar o mascote quando uma atividade é completada
+            if (checkbox.checked) {
+                notifyActivityCompleted();
+            }
         });
     });
 

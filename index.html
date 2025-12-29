@@ -11,6 +11,16 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="src/assets/icon-192.svg">
     <link rel="stylesheet" href="src/css/style.css">
+    <!-- Three.js para modelos 3D -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 
 <body>
@@ -38,6 +48,13 @@
                 <button class="menu-item" id="menuViewToggleBtn">
                     <span class="menu-icon">📅</span>
                     <span class="menu-text" id="viewToggleText">Ver Todos os Dias</span>
+                </button>
+            </li>
+            <li class="menu-divider"></li>
+            <li>
+                <button class="menu-item" id="menuPetSettingsBtn">
+                    <span class="menu-icon">🤖</span>
+                    <span class="menu-text">Configurações do Mascote</span>
                 </button>
             </li>
             <li class="menu-divider"></li>
@@ -88,6 +105,83 @@
     </nav>
     <div class="menu-overlay" id="menuOverlay"></div>
 
+    <!-- Modal de Configurações do Mascote -->
+    <div class="modal pet-settings-modal" id="petSettingsModal">
+        <div class="modal-content pet-settings-content">
+            <div class="modal-header">
+                <h2>🤖 Configurações do Mascote</h2>
+                <button class="modal-close" id="petSettingsClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pet-settings-section">
+                    <h3>🎬 Animações de Eventos</h3>
+                    <p class="section-description">Configure qual animação do Ornn será reproduzida em cada evento</p>
+                    
+                    <div class="settings-list" id="petSettingsList">
+                        <div class="setting-item setting-item-highlight">
+                            <label class="setting-label">
+                                <span class="setting-icon">⭐</span>
+                                <span class="setting-text">Animação Padrão (Loop)</span>
+                            </label>
+                            <select class="setting-select" id="animDefault">
+                                <option value="-1">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">✅</span>
+                                <span class="setting-text">Ao Completar Tarefa</span>
+                            </label>
+                            <select class="setting-select" id="animOnTaskComplete">
+                                <option value="-1">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🎆</span>
+                                <span class="setting-text">Ao Subir de Nível</span>
+                            </label>
+                            <select class="setting-select" id="animOnLevelUp">
+                                <option value="-1">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🤗</span>
+                                <span class="setting-text">Ao Fazer Carinho</span>
+                            </label>
+                            <select class="setting-select" id="animOnPet">
+                                <option value="-1">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🎮</span>
+                                <span class="setting-text">Ao Brincar</span>
+                            </label>
+                            <select class="setting-select" id="animOnPlay">
+                                <option value="-1">Carregando...</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <span class="setting-icon">🍪</span>
+                                <span class="setting-text">Ao Alimentar</span>
+                            </label>
+                            <select class="setting-select" id="animOnFeed">
+                                <option value="-1">Carregando...</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-note">
+                        <p>💡 <strong>Dica:</strong> As animações são carregadas quando você abre a aba do Mascote pela primeira vez.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <button class="menu-toggle" id="menuToggle" aria-label="Menu">
@@ -109,6 +203,11 @@
         <div class="week-selector desktop-only">
             <button class="week-btn active" data-week="A">📅 Semana A</button>
             <button class="week-btn" data-week="B">📅 Semana B</button>
+        </div>
+
+        <!-- Mascote na Página Principal -->
+        <div class="main-pet-widget desktop-only" id="mainPetWidget">
+            <div class="pet-widget-character" id="mainPetCharacter"></div>
         </div>
 
         <!-- Container Principal (visível apenas no mobile quando aba cronograma ativa) -->
@@ -858,6 +957,10 @@
             <button class="tab-btn" data-tab="meditation">
                 <span class="tab-icon">🧘</span>
                 <span class="tab-label">Meditação</span>
+            </button>
+            <button class="tab-btn" data-tab="pet">
+                <span class="tab-icon">🐾</span>
+                <span class="tab-label">Mascote</span>
             </button>
             <button class="tab-btn" data-tab="notes">
                 <span class="tab-icon">📝</span>

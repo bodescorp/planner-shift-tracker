@@ -2,17 +2,24 @@
 // GERENCIADOR DE ABAS/PÁGINAS (MOBILE)
 // ========================================
 
+import { createPetContent } from './pet-system.js';
+
 export function initTabsManager() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const mainContent = document.getElementById('mainContent');
     const meditationContent = createMeditationContent();
+    const petContent = createPetContent();
     const notesContent = createNotesContent();
+
+    // Anexar petContent ao DOM
+    document.body.appendChild(petContent);
 
     // Controlar visibilidade das "páginas"
     function showPage(pageId) {
         // Esconder tudo primeiro
         mainContent.classList.add('hidden');
         meditationContent.style.display = 'none';
+        petContent.style.display = 'none';
         notesContent.style.display = 'none';
 
         // Mostrar a página selecionada
@@ -20,6 +27,8 @@ export function initTabsManager() {
             mainContent.classList.remove('hidden');
         } else if (pageId === 'meditation') {
             meditationContent.style.display = 'block';
+        } else if (pageId === 'pet') {
+            petContent.style.display = 'block';
         } else if (pageId === 'notes') {
             notesContent.style.display = 'block';
         }

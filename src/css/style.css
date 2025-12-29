@@ -1314,3 +1314,628 @@ h1 {
         display: none !important;
     }
 }
+/* ========================================
+   PÁGINA DO MASCOTE VIRTUAL (PET) - MINIMALISTA
+   ======================================== */
+.pet-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pet-minimal-container {
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Stats Minimalistas */
+.pet-stats-minimal {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.stat-badge {
+    background: rgba(167, 139, 250, 0.1);
+    border: 2px solid rgba(167, 139, 250, 0.3);
+    border-radius: 20px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stat-icon {
+    font-size: 1.2rem;
+}
+
+.stat-text {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.stat-text strong {
+    color: #a78bfa;
+    margin-left: 2px;
+}
+
+/* Barra XP Minimalista */
+.pet-xp-bar-minimal {
+    background: rgba(26, 26, 26, 0.5);
+    border: 2px solid #333;
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.pet-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #a78bfa, #ec4899);
+    transition: width 0.5s ease;
+    border-radius: 20px;
+}
+
+/* Display do Mascote - CENTRALIZADO */
+.pet-display-minimal {
+    position: relative;
+    text-align: center;
+    margin-bottom: 30px;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pet-character-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+}
+
+.pet-character {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, transparent 70%);
+}
+
+.pet-character.model-3d {
+    border-radius: 0;
+    background: transparent;
+}
+
+.pet-character canvas {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 10px;
+}
+
+.pet-character:hover {
+    transform: scale(1.05);
+}
+
+.pet-character:active {
+    transform: scale(0.95);
+}
+
+.pet-custom-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+}
+
+.pet-character svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 4px 20px rgba(167, 139, 250, 0.3));
+}
+
+.pet-character.pet-state-happy {
+    animation: bounce 1s ease infinite;
+}
+
+.pet-character.pet-state-excited {
+    animation: shake 0.5s ease infinite;
+}
+
+.pet-name-editable {
+    margin-top: 20px;
+    font-size: 1.5rem;
+    color: #a78bfa;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.pet-name-editable:hover {
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.pet-message {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #a78bfa, #ec4899);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(167, 139, 250, 0.4);
+}
+
+.pet-message.visible {
+    opacity: 1;
+    visibility: visible;
+    top: -10px;
+}
+
+.pet-display-minimal.level-up {
+    animation: levelUpPulse 1s ease;
+}
+
+/* Ações Minimalistas */
+.pet-actions-minimal {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.pet-action-btn-minimal {
+    width: 60px;
+    height: 60px;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.pet-action-btn-minimal:hover {
+    background: #2a2a2a;
+    border-color: #a78bfa;
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 5px 20px rgba(167, 139, 250, 0.3);
+}
+
+.pet-action-btn-minimal:active {
+    transform: translateY(0) scale(1);
+}
+
+/* Controles de Animação 3D */
+.pet-animation-controls {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.animation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #333;
+}
+
+.animation-title {
+    color: #a78bfa;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.animation-toggle {
+    background: rgba(167, 139, 250, 0.1);
+    border: 2px solid #a78bfa;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.animation-toggle:hover {
+    background: rgba(167, 139, 250, 0.2);
+    transform: scale(1.1);
+}
+
+.animation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.animation-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0a0a0a;
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    width: 100%;
+}
+
+.animation-item:hover {
+    background: #1a1a1a;
+    border-color: #a78bfa;
+    transform: translateX(5px);
+}
+
+.animation-item.active {
+    background: rgba(167, 139, 250, 0.15);
+    border-color: #a78bfa;
+}
+
+.animation-number {
+    background: rgba(167, 139, 250, 0.2);
+    color: #a78bfa;
+    font-weight: bold;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.animation-name {
+    flex: 1;
+    color: #e0e0e0;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.animation-duration {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.no-animations {
+    color: #9ca3af;
+    text-align: center;
+    padding: 12px;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Configurações de Animações */
+.pet-animation-settings {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.pet-animation-settings summary {
+    color: #a78bfa;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.pet-animation-settings summary:hover {
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.pet-animation-settings summary::-webkit-details-marker {
+    display: none;
+}
+
+.settings-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0a0a0a;
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 12px;
+    gap: 12px;
+}
+
+.setting-item-highlight {
+    background: rgba(236, 72, 153, 0.1);
+    border-color: #ec4899;
+}
+
+.setting-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.setting-icon {
+    font-size: 1.2rem;
+}
+
+.setting-text {
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.setting-select {
+    background: #1a1a1a;
+    border: 2px solid #a78bfa;
+    border-radius: 8px;
+    color: #e0e0e0;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    min-width: 150px;
+    transition: all 0.3s;
+}
+
+.setting-select:hover {
+    background: #2a2a2a;
+    border-color: #ec4899;
+}
+
+.setting-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+}
+
+/* Widget do Mascote na Página Principal */
+.main-pet-widget {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pet-widget-character {
+    width: 200px;
+    height: 200px;
+    border-radius: 20px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, transparent 70%);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.2);
+}
+
+.pet-widget-character canvas {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 20px;
+}
+
+/* Modal de Configurações do Mascote */
+.pet-settings-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.pet-settings-content {
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pet-settings-section {
+    margin-bottom: 20px;
+}
+
+.pet-settings-section h3 {
+    color: #a78bfa;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.section-description {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.settings-note {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(167, 139, 250, 0.1);
+    border: 2px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+}
+
+.settings-note p {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Conquistas Minimalistas (Collapsible) */
+.pet-achievements-minimal {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.pet-achievements-minimal summary {
+    color: #a78bfa;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.pet-achievements-minimal summary:hover {
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.pet-achievements-minimal summary::-webkit-details-marker {
+    display: none;
+}
+
+.achievements-list-minimal {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.achievement-item-minimal {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0a0a0a;
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.3s;
+}
+
+.achievement-item-minimal.unlocked {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.achievement-item-minimal.locked {
+    opacity: 0.4;
+}
+
+.achievement-icon-minimal {
+    font-size: 1.5rem;
+    min-width: 30px;
+    text-align: center;
+}
+
+.achievement-info-minimal {
+    flex: 1;
+}
+
+.achievement-name-minimal {
+    color: #e0e0e0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.achievement-desc-minimal {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.achievement-check {
+    color: #10b981;
+    font-size: 1.2rem;
+}
+
+/* Animações */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-5px) rotate(-5deg); }
+    75% { transform: translateX(5px) rotate(5deg); }
+}
+
+@keyframes levelUpPulse {
+    0%, 100% { 
+        transform: scale(1); 
+    }
+    50% { 
+        transform: scale(1.1);
+    }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .pet-minimal-container {
+        padding: 15px;
+    }
+
+    .pet-character-wrapper {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .stat-badge {
+        padding: 6px 12px;
+    }
+    
+    .stat-icon {
+        font-size: 1rem;
+    }
+    
+    .stat-text {
+        font-size: 0.75rem;
+    }
+    
+    .pet-action-btn-minimal {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .pet-name-editable {
+        font-size: 1.2rem;
+    }
+}

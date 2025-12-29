@@ -11,6 +11,7 @@ import { generateReport } from './reports.js';
 import { resetCurrentDay } from './activities.js';
 import { showConfirmDialog } from './cycle-system.js';
 import { updateDayView, toggleViewMode } from './mobile-view.js';
+import { openPetSettingsModal, closePetSettingsModal } from './pet-system.js';
 
 export function openMenu() {
     sideMenu.classList.add('active');
@@ -127,6 +128,33 @@ export function initMenu() {
             if (viewToggleText) {
                 const showAllDays = localStorage.getItem('showAllDays') === 'true';
                 viewToggleText.textContent = showAllDays ? 'Ver Apenas Hoje' : 'Ver Todos os Dias';
+            }
+        });
+    }
+
+    // Botão de configurações do mascote
+    const menuPetSettingsBtn = document.getElementById('menuPetSettingsBtn');
+    if (menuPetSettingsBtn) {
+        menuPetSettingsBtn.addEventListener('click', () => {
+            closeMenu();
+            setTimeout(() => {
+                openPetSettingsModal();
+            }, 300);
+        });
+    }
+
+    // Fechar modal de configurações
+    const petSettingsClose = document.getElementById('petSettingsClose');
+    if (petSettingsClose) {
+        petSettingsClose.addEventListener('click', closePetSettingsModal);
+    }
+
+    // Fechar ao clicar fora do modal
+    const petSettingsModal = document.getElementById('petSettingsModal');
+    if (petSettingsModal) {
+        petSettingsModal.addEventListener('click', (e) => {
+            if (e.target === petSettingsModal) {
+                closePetSettingsModal();
             }
         });
     }

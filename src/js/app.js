@@ -20,6 +20,7 @@ import { initReports, initKeyboardShortcuts } from './modules/reports.js';
 import { registerServiceWorker } from './modules/service-worker-register.js';
 import { initTabsManager } from './modules/tabs-manager.js';
 import { initMeditationPlayer } from './modules/meditation-player.js';
+import { initPetSystem, initMainPetWidget } from './modules/pet-system.js';
 
 // ========================================
 // INICIALIZAÇÃO
@@ -47,12 +48,23 @@ initActivities();
 initWaterNotifications();
 initReports();
 initKeyboardShortcuts();
+initPetSystem();
 initTabsManager();
 initMeditationPlayer();
 registerServiceWorker();
 
 // Carregar estado da aplicação
 loadState();
+
+// Inicializar widget do mascote na página principal
+// Aguardar DOM e outros módulos carregarem
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => initMainPetWidget(), 800);
+    });
+} else {
+    setTimeout(() => initMainPetWidget(), 800);
+}
 
 // Iniciar monitores
 startDayChangeMonitor();
