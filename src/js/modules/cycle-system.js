@@ -17,17 +17,13 @@ export function getStartDate() {
     const saved = localStorage.getItem('cycleStartDate');
     if (saved) {
         const date = new Date(saved);
-        console.log(`📅 Debug getStartDate: Data de início salva = ${date.toLocaleDateString('pt-BR')} (${saved})`);
         
         if (isNaN(date.getTime())) {
-            console.error('❌ Erro: Data inválida no localStorage!');
             return null;
         }
         
         return date;
     }
-    console.log('⚠️ Debug getStartDate: Nenhuma data de início configurada no localStorage');
-    console.log(`🔍 Debug: Todas as chaves no localStorage:`, Object.keys(localStorage));
     return null;
 }
 
@@ -65,7 +61,6 @@ export function isWorkDay(date = null) {
     }
     
     const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    console.log(`🔍 Debug: Dias desde início = ${daysSinceStart}, Semana ${weekType}, ${dayNames[dayOfWeek]}, Trabalho? ${isWork ? 'SIM' : 'NÃO'}`);
     
     return isWork;
 }
@@ -83,7 +78,6 @@ export function detectCurrentMode() {
     // Semana A (weekNumber 0) ou Semana B (weekNumber 1)
     const currentWeek = weekNumber === 0 ? 'A' : 'B';
     
-    console.log(`🔍 detectCurrentMode: Semana ${currentWeek} (weekNumber: ${weekNumber})`);
     
     return currentWeek;
 }
@@ -140,8 +134,6 @@ export function confirmTodayAsWorkDay(isWork) {
     const dayOfWeek = today.getDay();
     const dayNames = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
     
-    console.log(`📅 Configurando: Hoje é ${dayNames[dayOfWeek]} (${today.toLocaleDateString('pt-BR')})`);
-    console.log(`📋 Usuário disse: ${isWork ? 'Trabalho' : 'Folga'}`);
     
     // Precisamos calcular qual dia seria o início da Semana A atual
     // Semana A: trabalha Seg(1), Qua(3), Sex(5), Dom(0)
@@ -163,14 +155,12 @@ export function confirmTodayAsWorkDay(isWork) {
                 startDate = new Date(today);
                 startDate.setDate(today.getDate() - daysToSunday);
             }
-            console.log(`✅ Identificado: Semana A (trabalha Seg/Qua/Sex/Dom)`);
         } else if ([2, 4, 6].includes(dayOfWeek)) {
             // Hoje trabalha Ter/Qui/Sáb -> Semana B
             // Precisa voltar 7 dias + dias até domingo
             const daysToLastSunday = dayOfWeek + 7;
             startDate = new Date(today);
             startDate.setDate(today.getDate() - daysToLastSunday);
-            console.log(`✅ Identificado: Semana B (trabalha Ter/Qui/Sáb)`);
         }
     } else {
         // Se hoje é folga, determinar qual semana baseado no dia da semana
@@ -179,29 +169,23 @@ export function confirmTodayAsWorkDay(isWork) {
             const daysToSunday = dayOfWeek;
             startDate = new Date(today);
             startDate.setDate(today.getDate() - daysToSunday);
-            console.log(`✅ Identificado: Semana A (hoje é folga Ter/Qui/Sáb)`);
         } else if ([1, 3, 5].includes(dayOfWeek)) {
             // Hoje NÃO trabalha Seg/Qua/Sex -> Semana B (trabalha Ter/Qui/Sáb)
             const daysToLastSunday = dayOfWeek + 7;
             startDate = new Date(today);
             startDate.setDate(today.getDate() - daysToLastSunday);
-            console.log(`✅ Identificado: Semana B (hoje é folga Seg/Qua/Sex)`);
         } else if (dayOfWeek === 0) {
             // Domingo como folga -> Semana B
             startDate = new Date(today);
             startDate.setDate(today.getDate() - 7); // Volta 1 semana para o domingo anterior
-            console.log(`✅ Domingo (folga) - definindo como Semana B`);
         }
     }
     
     localStorage.setItem('cycleStartDate', startDate.toISOString());
-    console.log(`💾 Data de início calculada: ${startDate.toLocaleDateString('pt-BR')}`);
     
     const verificacao = localStorage.getItem('cycleStartDate');
-    console.log(`🔍 VERIFICAÇÃO: cycleStartDate agora contém: ${verificacao}`);
     
     if (!verificacao) {
-        console.error('❌ ERRO CRÍTICO: localStorage.setItem NÃO funcionou!');
         alert('❌ Erro ao salvar configuração! Verifique se o localStorage está habilitado no navegador.');
         return;
     }
@@ -211,8 +195,6 @@ export function confirmTodayAsWorkDay(isWork) {
     const isWorkToday = isWorkDay();
     const modeLabel = isWorkToday ? 'Trabalho' : 'Folga';
     
-    console.log(`🔄 Modo detectado após salvamento: Semana ${newMode}`);
-    console.log(`📋 Hoje é: ${modeLabel}`);
     
     updateWeekIndicator();
     switchWeek(newMode);
@@ -220,8 +202,6 @@ export function confirmTodayAsWorkDay(isWork) {
     
     showNotification(`✅ Configurado! Semana ${newMode} - Hoje é ${modeLabel}`);
     
-    console.log(`✅ Sistema configurado! Semana ${newMode}`);
-    console.log(`📊 Verificação final: cycleStartDate = ${localStorage.getItem('cycleStartDate')}`);
 }
 
 export function showConfirmDialog() {
@@ -299,7 +279,6 @@ export function startDayChangeMonitor() {
             const newWeek = detectCurrentMode();
             const currentWeek = localStorage.getItem('currentWeek');
             if (newWeek !== currentWeek) {
-                console.log('Dia mudou - atualizando...');
                 switchWeek(newWeek);
                 updateWeekIndicator();
                 const newLabel = newWeek === 'A' ? 'Plantão' : 'Folga';

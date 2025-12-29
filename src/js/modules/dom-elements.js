@@ -34,5 +34,3 @@ export const cycleBadge = document.getElementById('cycleBadge');
 export const menuCycleInfo = document.getElementById('menuCycleInfo');
 export const menuStartDate = document.getElementById('menuStartDate');
 
-console.log('🔍 weekContents encontrados:', weekContents.length);
-weekContents.forEach(wc => console.log(`  - ${wc.id}`));

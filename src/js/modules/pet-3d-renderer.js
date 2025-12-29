@@ -18,7 +18,6 @@ async function loadThreeJS() {
         OrbitControls = Controls;
         return true;
     } catch (error) {
-        console.error('❌ Erro ao carregar Three.js:', error);
         return false;
     }
 }
@@ -39,7 +38,6 @@ export class Pet3DRenderer {
     async init() {
         const loaded = await loadThreeJS();
         if (!loaded) {
-            console.error('❌ Three.js não carregado');
             return false;
         }
 
@@ -47,11 +45,11 @@ export class Pet3DRenderer {
         this.scene = new THREE.Scene();
         this.scene.background = null; // Transparente
         
-        // Câmera (ajustada para zoom de 50%)
+        // Câmera (ajustada para melhor visualização)
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
         this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-        this.camera.position.set(0, 0.3, 3); // Centralizado e mais baixo
+        this.camera.position.set(1, 3, 3); // Posição otimizada para visualização frontal
         
         // Renderer
         this.renderer = new THREE.WebGLRenderer({ 
@@ -102,16 +100,22 @@ export class Pet3DRenderer {
 
     async loadModel(modelPath) {
         if (!GLTFLoader) {
-            console.error('❌ GLTFLoader não disponível');
             return false;
         }
 
         try {
+            // Verificar se o modelo já está carregado
+            if (this.model && this.currentModelPath === modelPath) {
+                return true; // Modelo já carregado
+            }
+            
             // Remover modelo anterior
             if (this.model) {
                 this.scene.remove(this.model);
                 this.model = null;
             }
+            
+            this.currentModelPath = modelPath;
 
             const loader = new GLTFLoader();
             
@@ -126,12 +130,13 @@ export class Pet3DRenderer {
                         const center = box.getCenter(new THREE.Vector3());
                         const size = box.getSize(new THREE.Vector3());
                         
+                        // Ajustar escala para preencher melhor a tela
                         const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 1 / maxDim; // 50% do tamanho original
+                        const scale = 1.8 / maxDim; // Modelo maior para preencher a área
                         this.model.scale.multiplyScalar(scale);
                         
+                        // Centralizar o modelo
                         this.model.position.sub(center.multiplyScalar(scale));
-                        this.model.position.y -= 0.2; // Abaixar um pouco o modelo
                         
                         // Adicionar à cena
                         this.scene.add(this.model);
@@ -160,21 +165,17 @@ export class Pet3DRenderer {
                         // Iniciar loop de animação
                         this.animate();
                         
-                        console.log('✅ Modelo 3D carregado:', modelPath);
                         resolve(true);
                     },
                     (progress) => {
                         const percent = (progress.loaded / progress.total) * 100;
-                        console.log(`📦 Carregando modelo: ${percent.toFixed(0)}%`);
                     },
                     (error) => {
-                        console.error('❌ Erro ao carregar modelo:', error);
                         reject(error);
                     }
                 );
             });
         } catch (error) {
-            console.error('❌ Erro ao processar modelo:', error);
             return false;
         }
     }

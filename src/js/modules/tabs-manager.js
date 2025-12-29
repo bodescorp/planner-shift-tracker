@@ -2,7 +2,7 @@
 // GERENCIADOR DE ABAS/PÁGINAS (MOBILE)
 // ========================================
 
-import { createPetContent } from './pet-system.js';
+import { createPetContent, ensurePetModelLoaded } from './pet-system.js';
 
 export function initTabsManager() {
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -29,6 +29,7 @@ export function initTabsManager() {
             meditationContent.style.display = 'block';
         } else if (pageId === 'pet') {
             petContent.style.display = 'block';
+            setTimeout(() => ensurePetModelLoaded(), 100);
         } else if (pageId === 'notes') {
             notesContent.style.display = 'block';
         }
@@ -61,8 +62,6 @@ export function initTabsManager() {
     } else {
         showPage('schedule');
     }
-
-    console.log('✅ Sistema de abas/páginas inicializado');
 }
 
 // Criar conteúdo da página de meditação

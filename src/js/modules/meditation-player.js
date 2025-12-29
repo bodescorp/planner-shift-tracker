@@ -26,7 +26,6 @@ function initPlayer() {
     const timeDisplay = document.getElementById('timeDisplay');
 
     if (!audio) {
-        console.warn('⚠️ Player de meditação não encontrado');
         return;
     }
 
@@ -51,7 +50,6 @@ function initPlayer() {
         if (audioTitleLarge) audioTitleLarge.textContent = `Áudio ${audioNumber} de ${AUDIO_COUNT}`;
         
         localStorage.setItem('lastMeditationAudio', audioNumber);
-        console.log(`🎵 Carregando: ${audio.src}`);
     }
 
     // Toggle play/pause
@@ -126,7 +124,6 @@ function initPlayer() {
     });
 
     audio.addEventListener('error', (e) => {
-        console.error('❌ Erro ao carregar áudio:', e);
         if (audioTitle) audioTitle.textContent = `Erro ao carregar áudio ${currentAudio}`;
     });
 
@@ -135,7 +132,6 @@ function initPlayer() {
     const audioToLoad = lastAudio ? parseInt(lastAudio) : getAudioForToday();
     loadAudio(audioToLoad);
 
-    console.log(`✅ Player de meditação inicializado - Áudio do dia: ${getAudioForToday()}`);
 }
 
 // ========================================
@@ -149,7 +145,6 @@ function initNotes() {
     const lastSaved = document.getElementById('lastSaved');
 
     if (!notesTextarea) {
-        console.warn('⚠️ Bloco de notas não encontrado');
         return;
     }
 
@@ -196,7 +191,6 @@ function initNotes() {
             })}`;
         }
         
-        console.log('💾 Notas salvas');
     }
 
     // Auto-salvar ao digitar (com debounce)
@@ -216,7 +210,6 @@ function initNotes() {
             localStorage.removeItem('notesSavedAt');
             updateCharCount();
             if (lastSaved) lastSaved.textContent = '';
-            console.log('🗑️ Notas limpas');
         }
     }
 
@@ -237,5 +230,4 @@ function initNotes() {
     // Carregar notas ao iniciar
     loadNotes();
 
-    console.log('✅ Bloco de notas inicializado');
 }

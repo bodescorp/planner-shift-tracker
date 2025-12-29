@@ -14,16 +14,13 @@ import { notifyActivityCompleted } from './pet-system.js';
 
 export function loadState() {
     const savedStartDate = localStorage.getItem('cycleStartDate');
-    console.log(`🔍 loadState: cycleStartDate no localStorage = ${savedStartDate}`);
     
     if (!savedStartDate) {
-        console.log('⚠️ Aplicação não configurada. Mostrando diálogo de configuração...');
         setTimeout(() => showConfirmDialog(), 500);
         return;
     }
     
     const currentWeek = detectCurrentMode();
-    console.log(`🔍 loadState: Semana ${currentWeek} detectada`);
     
     const savedChecks = JSON.parse(localStorage.getItem('checkboxes') || '{}');
     
@@ -41,18 +38,9 @@ export function loadState() {
     updateDayView();
     updateWeekIndicator();
     updateMenuIndicators();
-    
-    const startDate = getStartDate();
-    const isWork = isWorkDay();
-    const mode = isWork ? 'Trabalho' : 'Folga';
-    console.log(`✅ Configuração carregada automaticamente do localStorage`);
-    console.log(`📅 Data inicial: ${startDate.toLocaleDateString('pt-BR')}`);
-    console.log(`🏥 Hoje: ${mode} (Semana ${currentWeek})`);
 }
 
 export function switchWeek(week) {
-    console.log(`🔄 switchWeek chamada com: ${week}`);
-    
     const allButtons = document.querySelectorAll('.week-btn[data-week]');
     allButtons.forEach(btn => {
         if (btn.dataset.week === week) {
@@ -63,23 +51,17 @@ export function switchWeek(week) {
     });
     
     weekContents.forEach(content => {
-        console.log(`🔍 Verificando content: ${content.id}, alvo: semana-${week.toLowerCase()}`);
         if (content.id === `semana-${week.toLowerCase()}`) {
             content.classList.add('active');
-            console.log(`✅ Ativando: ${content.id}`);
         } else {
             content.classList.remove('active');
-            console.log(`❌ Desativando: ${content.id}`);
         }
     });
     
     localStorage.setItem('currentWeek', week);
-    console.log(`💾 Semana ${week} salva no localStorage`);
     
     updateDayView();
     updateWeekIndicator();
-    
-    console.log(`✅ switchWeek concluída para Semana ${week}`);
 }
 
 export function updateProgress(dayElement) {
@@ -160,8 +142,6 @@ export function initActivities() {
 
     if (resetBtn) {
         resetBtn.addEventListener('click', resetCurrentDay);
-    } else {
-        console.warn('⚠️ resetBtn não encontrado no DOM');
     }
 
     weekButtons.forEach(btn => {

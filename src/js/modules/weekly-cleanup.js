@@ -17,7 +17,6 @@ export function checkAndClearWeeklyData() {
         const today = now.toDateString();
         
         if (lastClear !== today) {
-            console.log('🗑️ Limpeza semanal iniciada...');
             
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = false);
@@ -25,7 +24,6 @@ export function checkAndClearWeeklyData() {
             updateAllProgress();
             
             localStorage.setItem('lastWeeklyClear', today);
-            console.log('✅ Limpeza semanal concluída!');
         }
     }
 }

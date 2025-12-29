@@ -29,7 +29,27 @@ class PetSystem {
     loadData() {
         const saved = localStorage.getItem('petData');
         if (saved) {
-            return JSON.parse(saved);
+            const data = JSON.parse(saved);
+            // Mesclar com valores padrão para garantir que todos os campos existam
+            return {
+                name: data.name || 'Ornn',
+                level: data.level || 1,
+                xp: data.xp || 0,
+                totalActivitiesCompleted: data.totalActivitiesCompleted || 0,
+                lastInteraction: data.lastInteraction || Date.now(),
+                achievements: data.achievements || [],
+                customImage: data.customImage || null,
+                modelType: data.modelType || '3d',
+                model3DPath: data.model3DPath || 'src/assets/ornn.glb',
+                animationSettings: {
+                    default: data.animationSettings?.default ?? 0,
+                    onTaskComplete: data.animationSettings?.onTaskComplete ?? 0,
+                    onLevelUp: data.animationSettings?.onLevelUp ?? -1,
+                    onPet: data.animationSettings?.onPet ?? -1,
+                    onPlay: data.animationSettings?.onPlay ?? -1,
+                    onFeed: data.animationSettings?.onFeed ?? -1
+                }
+            };
         }
         return {
             name: 'Ornn',
@@ -337,8 +357,18 @@ class PetSystem {
         const petCharacter = this.container.querySelector('#petCharacter');
         if (!petCharacter) return;
         
+        // Verificar se já foi inicializado ou está carregando
+        if (this.renderer3D && this.is3DModel) return;
+        if (this.isLoading3DModel) return; // Evitar chamadas duplicadas
+        
+        this.isLoading3DModel = true;
+        
+        // Limpar conteúdo anterior (SVG ou imagem) antes de carregar o modelo 3D
+        petCharacter.innerHTML = '';
+        
         // Criar renderer 3D se não existir
         if (!this.renderer3D) {
+            const { Pet3DRenderer } = await import('./pet-3d-renderer.js');
             this.renderer3D = new Pet3DRenderer(petCharacter);
             await this.renderer3D.init();
         }
@@ -347,16 +377,27 @@ class PetSystem {
         const success = await this.renderer3D.loadModel(modelPath);
         if (success) {
             this.is3DModel = true;
+            this.isLoading3DModel = false;
             petCharacter.classList.add('model-3d');
             
             // Aplicar animação padrão se configurada
             const defaultAnim = this.data.animationSettings?.default ?? 0;
             if (defaultAnim >= 0) {
-                this.renderer3D.playAnimation(defaultAnim);
+                setTimeout(() => {
+                    this.renderer3D.playAnimation(defaultAnim);
+                }, 100);
             }
             
             // Atualizar lista de animações
             this.updateAnimationsList();
+            
+            // Popular configurações de animação com valores salvos
+            const animations = this.renderer3D.getAnimations();
+            if (animations && animations.length > 0) {
+                this.populateAnimationSettings(animations);
+            }
+        } else {
+            this.isLoading3DModel = false;
         }
     }
 
@@ -715,9 +756,15 @@ export function notifyActivityCompleted() {
     }
 }
 
+export function ensurePetModelLoaded() {
+    if (petSystem && petSystem.data.modelType === '3d') {
+        const modelPath = petSystem.data.model3DPath || 'src/assets/ornn.glb';
+        petSystem.init3DModel(modelPath);
+    }
+}
+
 export function initMainPetWidget() {
     if (!petSystem) {
-        console.warn('⚠️ Pet system não inicializado, tentando novamente...');
         setTimeout(() => initMainPetWidget(), 500);
         return;
     }
@@ -725,19 +772,15 @@ export function initMainPetWidget() {
     const mainPetCharacter = document.getElementById('mainPetCharacter');
     
     if (!mainPetCharacter) {
-        console.warn('⚠️ mainPetCharacter não encontrado no DOM');
         return;
     }
     
     // Verificar se o elemento está visível (importante para desktop-only)
     const isVisible = mainPetCharacter.offsetParent !== null;
     if (!isVisible) {
-        console.log('⏳ Widget não visível ainda, aguardando...');
         setTimeout(() => initMainPetWidget(), 300);
         return;
     }
-    
-    console.log('🎮 Inicializando widget do mascote...');
     
     // Importar Pet3DRenderer dinamicamente
     import('./pet-3d-renderer.js').then(module => {
@@ -748,31 +791,22 @@ export function initMainPetWidget() {
         miniRenderer.defaultAnimIndex = petSystem.data.animationSettings?.default ?? 0;
         
         miniRenderer.init().then(() => {
-            console.log('✅ Three.js inicializado no widget');
             miniRenderer.loadModel('src/assets/ornn.glb').then(() => {
-                console.log('✅ Modelo Ornn carregado no widget');
                 // Aplicar animação padrão após carregar
                 const defaultAnim = petSystem.data.animationSettings?.default ?? 0;
                 if (defaultAnim >= 0) {
                     setTimeout(() => {
                         miniRenderer.playAnimation(defaultAnim);
-                        console.log(`🎬 Animação padrão ${defaultAnim} aplicada`);
                     }, 100);
                 }
-            }).catch(err => {
-                console.error('❌ Erro ao carregar modelo no widget:', err);
-            });
-        }).catch(err => {
-            console.error('❌ Erro ao inicializar Three.js no widget:', err);
-        });
+            }).catch(() => {});
+        }).catch(() => {});
         
         // Guardar referência
         if (petSystem) {
             petSystem.mainRenderer = miniRenderer;
         }
-    }).catch(err => {
-        console.error('❌ Erro ao importar Pet3DRenderer:', err);
-    });
+    }).catch(() => {});
 }
 
 export function updateMainPetWidget() {
