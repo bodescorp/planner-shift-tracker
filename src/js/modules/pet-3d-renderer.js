@@ -23,7 +23,7 @@ async function loadThreeJS() {
 }
 
 export class Pet3DRenderer {
-    constructor(container) {
+    constructor(container, onClickCallback = null) {
         this.container = container;
         this.scene = null;
         this.camera = null;
@@ -33,6 +33,11 @@ export class Pet3DRenderer {
         this.animationId = null;
         this.mixer = null;
         this.clock = null;
+        this.fadeDuration = 0.5; // Duração do fade (aumentado para transição mais suave)
+        this.animationSpeed = 1.0; // Velocidade padrão
+        this.onClickCallback = onClickCallback;
+        this.raycaster = null;
+        this.mouse = null;
     }
 
     async init() {
@@ -40,16 +45,21 @@ export class Pet3DRenderer {
         if (!loaded) {
             return false;
         }
-
+        
+        // Criar raycaster para detecção de cliques
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        
         // Criar cena
         this.scene = new THREE.Scene();
         this.scene.background = null; // Transparente
         
         // Câmera (ajustada para melhor visualização)
-        const width = this.container.clientWidth;
-        const height = this.container.clientHeight;
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-        this.camera.position.set(1, 3, 3); // Posição otimizada para visualização frontal
+        const width = this.container.clientWidth || 250;
+        const height = this.container.clientHeight || 250;
+        
+        this.camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+        this.camera.position.set(0, 1.5, 4); // Posição centralizada e afastada
         
         // Renderer
         this.renderer = new THREE.WebGLRenderer({ 
@@ -66,16 +76,23 @@ export class Pet3DRenderer {
         this.container.innerHTML = '';
         this.container.appendChild(this.renderer.domElement);
         
+        // Adicionar evento de clique no canvas (apenas uma vez)
+        if (!this.clickHandlerAdded) {
+            this.clickHandler = (event) => this.onCanvasClick(event);
+            this.renderer.domElement.addEventListener('click', this.clickHandler);
+            this.clickHandlerAdded = true;
+        }
+        
         // Controles de órbita
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.enableZoom = true;
-        this.controls.autoRotate = false; // Desativado
+        this.controls.autoRotate = false;
         this.controls.autoRotateSpeed = 0;
         this.controls.minDistance = 2;
-        this.controls.maxDistance = 8;
-        this.controls.target.set(1, 1, 3); // Centralizar no modelo
+        this.controls.maxDistance = 10;
+        this.controls.target.set(0, 1, 0); // Centralizar na origem
         
         // Iluminação
         const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
@@ -132,11 +149,15 @@ export class Pet3DRenderer {
                         
                         // Ajustar escala para preencher melhor a tela
                         const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 1.8 / maxDim; // Modelo maior para preencher a área
+                        const scale = 2.0 / maxDim; // Escala ajustada
                         this.model.scale.multiplyScalar(scale);
                         
-                        // Centralizar o modelo
-                        this.model.position.sub(center.multiplyScalar(scale));
+                        // Centralizar o modelo na origem
+                        this.model.position.set(
+                            -center.x * scale,
+                            -center.y * scale + 1, // Elevar um pouco
+                            -center.z * scale
+                        );
                         
                         // Adicionar à cena
                         this.scene.add(this.model);
@@ -155,10 +176,14 @@ export class Pet3DRenderer {
                             
                             // Reproduzir animação padrão se configurada
                             if (this.defaultAnimIndex !== undefined && this.defaultAnimIndex >= 0 && this.currentActions[this.defaultAnimIndex]) {
-                                this.currentActions[this.defaultAnimIndex].play();
+                                const defaultAction = this.currentActions[this.defaultAnimIndex];
+                                defaultAction.setLoop(THREE.LoopRepeat);
+                                defaultAction.play();
                             } else if (this.currentActions.length > 0) {
-                                // Caso contrário, reproduzir primeira animação
-                                this.currentActions[0].play();
+                                // Caso contrário, reproduzir primeira animação em loop
+                                const firstAction = this.currentActions[0];
+                                firstAction.setLoop(THREE.LoopRepeat);
+                                firstAction.play();
                             }
                         }
                         
@@ -168,7 +193,7 @@ export class Pet3DRenderer {
                         resolve(true);
                     },
                     (progress) => {
-                        const percent = (progress.loaded / progress.total) * 100;
+                        // Progresso do carregamento
                     },
                     (error) => {
                         reject(error);
@@ -181,7 +206,9 @@ export class Pet3DRenderer {
     }
 
     animate() {
-        if (!this.renderer || !this.scene || !this.camera) return;
+        if (!this.renderer || !this.scene || !this.camera) {
+            return;
+        }
         
         this.animationId = requestAnimationFrame(() => this.animate());
         
@@ -224,11 +251,36 @@ export class Pet3DRenderer {
         }
     }
 
+    onCanvasClick(event) {
+        if (!this.model || !this.camera || !this.raycaster) return;
+        
+        // Calcular posição do mouse em coordenadas normalizadas
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        // Atualizar raycaster
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        
+        // Verificar interseções com o modelo
+        const intersects = this.raycaster.intersectObject(this.model, true);
+        
+        if (intersects.length > 0 && this.onClickCallback) {
+            this.onClickCallback();
+        }
+    }
+
     dispose() {
         // Parar animação
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
+        }
+        
+        // Remover event listener de clique
+        if (this.clickHandler && this.renderer && this.renderer.domElement) {
+            this.renderer.domElement.removeEventListener('click', this.clickHandler);
+            this.clickHandlerAdded = false;
         }
         
         // Limpar recursos
@@ -291,18 +343,59 @@ export class Pet3DRenderer {
     setDefaultAnimation(index) {
         this.defaultAnimIndex = index;
         if (index >= 0 && this.currentActions && this.currentActions[index]) {
-            this.playAnimation(index);
+            // Parar todas as animações
+            this.currentActions.forEach(action => action.stop());
+            
+            // Reproduzir animação padrão em loop
+            const action = this.currentActions[index];
+            action.reset();
+            action.setLoop(THREE.LoopRepeat);
+            action.timeScale = this.animationSpeed; // Aplicar velocidade
+            action.play();
         }
     }
 
-    playAnimation(index) {
-        if (!this.currentActions || index >= this.currentActions.length) return;
+    playAnimation(index, loopMode = 'once') {
+        if (!this.currentActions || index >= this.currentActions.length || index < 0) return;
         
-        // Parar todas as animações
-        this.currentActions.forEach(action => action.stop());
+        // Parar todas as animações com fade
+        this.currentActions.forEach(action => {
+            action.fadeOut(this.fadeDuration);
+        });
         
         // Reproduzir animação selecionada
-        this.currentActions[index].reset().play();
+        setTimeout(() => {
+            const action = this.currentActions[index];
+            action.reset();
+            action.timeScale = this.animationSpeed; // Aplicar velocidade
+            
+            // Configurar loop baseado no parâmetro
+            if (loopMode === 'repeat') {
+                action.setLoop(THREE.LoopRepeat);
+                action.clampWhenFinished = false;
+            } else {
+                action.setLoop(THREE.LoopOnce);
+                action.clampWhenFinished = true;
+            }
+            
+            action.fadeIn(this.fadeDuration);
+            action.play();
+        }, this.fadeDuration * 1000);
+    }
+
+    setFadeDuration(duration) {
+        this.fadeDuration = duration;
+    }
+
+    setAnimationSpeed(speed) {
+        this.animationSpeed = speed;
+        
+        // Aplicar velocidade às animações em execução
+        if (this.currentActions) {
+            this.currentActions.forEach(action => {
+                action.timeScale = speed;
+            });
+        }
     }
 
     stopAllAnimations() {

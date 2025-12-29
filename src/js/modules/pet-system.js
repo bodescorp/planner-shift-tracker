@@ -3,6 +3,7 @@
 // ========================================
 
 import { Pet3DRenderer } from './pet-3d-renderer.js';
+import { loadChampionAbilities, getAbilitiesForPetActions } from './champion-abilities.js';
 
 // Estados do mascote
 const PET_STATES = {
@@ -24,6 +25,20 @@ class PetSystem {
         this.container = null;
         this.renderer3D = null;
         this.is3DModel = false;
+        this.championAbilities = null;
+        // Carregar habilidades do campeão
+        this.loadChampionData();
+    }
+
+    async loadChampionData() {
+        try {
+            await loadChampionAbilities('Ornn');
+            this.championAbilities = getAbilitiesForPetActions();
+            // Atualizar UI com os ícones das habilidades
+            this.updateAbilityIcons();
+        } catch (error) {
+            console.error('Erro ao carregar habilidades do campeão:', error);
+        }
     }
 
     loadData() {
@@ -38,17 +53,19 @@ class PetSystem {
                 totalActivitiesCompleted: data.totalActivitiesCompleted || 0,
                 lastInteraction: data.lastInteraction || Date.now(),
                 achievements: data.achievements || [],
-                customImage: data.customImage || null,
-                modelType: data.modelType || '3d',
+                modelType: '3d',
                 model3DPath: data.model3DPath || 'src/assets/ornn.glb',
                 animationSettings: {
                     default: data.animationSettings?.default ?? 0,
                     onTaskComplete: data.animationSettings?.onTaskComplete ?? 0,
                     onLevelUp: data.animationSettings?.onLevelUp ?? -1,
-                    onPet: data.animationSettings?.onPet ?? -1,
-                    onPlay: data.animationSettings?.onPlay ?? -1,
-                    onFeed: data.animationSettings?.onFeed ?? -1
-                }
+                    onPassive: data.animationSettings?.onPassive ?? -1,
+                    onQ: data.animationSettings?.onQ ?? -1,
+                    onW: data.animationSettings?.onW ?? -1,
+                    onE: data.animationSettings?.onE ?? -1,
+                    onR: data.animationSettings?.onR ?? -1
+                },
+                animOnClick: data.animOnClick ?? -1 // -1 = nenhuma animação
             };
         }
         return {
@@ -58,17 +75,25 @@ class PetSystem {
             totalActivitiesCompleted: 0,
             lastInteraction: Date.now(),
             achievements: [],
-            customImage: null,
-            modelType: '3d', // Ornn 3D por padrão
-            model3DPath: 'src/assets/ornn.glb', // Modelo padrão
+            modelType: '3d',
+            model3DPath: 'src/assets/ornn.glb',
             animationSettings: {
                 default: 0,
                 onTaskComplete: 0,
                 onLevelUp: -1,
-                onPet: -1,
-                onPlay: -1,
-                onFeed: -1
-            }
+                onPassive: -1,
+                onQ: -1,
+                onW: -1,
+                onE: -1,
+                onR: -1
+            },
+            animationBehavior: {
+                returnToDefault: true,
+                fadeDuration: 0.2,
+                speed: 1.0,
+                abilityLoop: 'once'
+            },
+            animOnClick: -1 // -1 = nenhuma animação
         };
     }
 
@@ -113,10 +138,10 @@ class PetSystem {
             if (animations[animIndex]) {
                 setTimeout(() => {
                     if (this.renderer3D && defaultAnimIndex >= 0) {
-                        this.renderer3D.playAnimation(defaultAnimIndex);
+                        this.renderer3D.playAnimation(defaultAnimIndex, 'repeat');
                     }
                     if (this.mainRenderer && defaultAnimIndex >= 0) {
-                        this.mainRenderer.playAnimation(defaultAnimIndex);
+                        this.mainRenderer.playAnimation(defaultAnimIndex, 'repeat');
                     }
                 }, animations[animIndex].duration * 1000);
             }
@@ -155,10 +180,10 @@ class PetSystem {
                 setTimeout(() => {
                     // Voltar para animação padrão
                     if (this.renderer3D && defaultAnimIndex >= 0) {
-                        this.renderer3D.playAnimation(defaultAnimIndex);
+                        this.renderer3D.playAnimation(defaultAnimIndex, 'repeat');
                     }
                     if (this.mainRenderer && defaultAnimIndex >= 0) {
-                        this.mainRenderer.playAnimation(defaultAnimIndex);
+                        this.mainRenderer.playAnimation(defaultAnimIndex, 'repeat');
                     }
                 }, animations[animIndex].duration * 1000);
             }
@@ -170,18 +195,74 @@ class PetSystem {
         }
     }
 
-    // Definir estado do mascote
+    // Definir estado do mascote (apenas para efeitos 3D)
     setState(state) {
         this.currentState = state;
         
         if (this.is3DModel && this.renderer3D) {
             this.renderer3D.setEmotionEffect(state);
-        } else {
-            this.updatePetVisual();
         }
     }
 
     // Interagir com o mascote
+    onMascotClick() {
+        // Evitar múltiplos cliques simultâneos
+        if (this.isPlayingClickAnimation) return;
+        
+        const animIndex = this.data.animOnClick ?? -1;
+        
+        // Se não há animação configurada, não fazer nada
+        if (animIndex < 0) return;
+        
+        this.isPlayingClickAnimation = true;
+        const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
+        
+        // Limpar timeouts anteriores
+        if (this.clickAnimTimeout) {
+            clearTimeout(this.clickAnimTimeout);
+            this.clickAnimTimeout = null;
+        }
+        if (this.clickAnimTimeoutMain) {
+            clearTimeout(this.clickAnimTimeoutMain);
+            this.clickAnimTimeoutMain = null;
+        }
+        
+        // Reproduzir animação uma vez
+        if (this.renderer3D) {
+            this.renderer3D.playAnimation(animIndex, 'once');
+            
+            // Voltar à animação padrão após a duração
+            const animations = this.renderer3D.getAnimations();
+            if (animations[animIndex]) {
+                const duration = animations[animIndex].duration || 2;
+                this.clickAnimTimeout = setTimeout(() => {
+                    if (this.renderer3D && defaultAnimIndex >= 0) {
+                        this.renderer3D.playAnimation(defaultAnimIndex, 'repeat');
+                    }
+                    this.isPlayingClickAnimation = false;
+                }, duration * 1000);
+            }
+        }
+        
+        if (this.mainRenderer) {
+            this.mainRenderer.playAnimation(animIndex, 'once');
+            
+            // Voltar à animação padrão após a duração
+            const animations = this.mainRenderer.getAnimations();
+            if (animations[animIndex]) {
+                const duration = animations[animIndex].duration || 2;
+                this.clickAnimTimeoutMain = setTimeout(() => {
+                    if (this.mainRenderer && defaultAnimIndex >= 0) {
+                        this.mainRenderer.playAnimation(defaultAnimIndex, 'repeat');
+                    }
+                }, duration * 1000);
+            }
+        }
+        
+        // Mostrar mensagem
+        this.showMessage('🐾 Carinho!');
+    }
+
     interact(action) {
         this.data.lastInteraction = Date.now();
         
@@ -189,56 +270,62 @@ class PetSystem {
         let message = '';
         
         switch(action) {
-            case 'pet':
-                animKey = 'onPet';
-                message = '😊 Que carinho gostoso!';
-                break;
-            case 'play':
-                animKey = 'onPlay';
-                message = '🎮 Vamos brincar!';
-                break;
-            case 'feed':
+            case 'passive':
                 this.addXP(5);
-                animKey = 'onFeed';
-                message = '😋 Obrigado!';
+                animKey = 'onPassive';
+                message = '⚒️ Forja Viva!';
+                break;
+            case 'q':
+                this.addXP(3);
+                animKey = 'onQ';
+                message = '🌋 Ruptura Vulcânica!';
+                break;
+            case 'w':
+                this.addXP(3);
+                animKey = 'onW';
+                message = '🔥 Sopro do Fole!';
+                break;
+            case 'e':
+                this.addXP(3);
+                animKey = 'onE';
+                message = '⚡ Investida Ardente!';
+                break;
+            case 'r':
+                this.addXP(5);
+                animKey = 'onR';
+                message = '🔨 Chamado do Deus Forjador!';
                 break;
         }
         
-        // Reproduzir animação configurada
-        const animIndex = this.data.animationSettings?.[animKey];
-        const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
+        // Mostrar mensagem
+        this.showMessage(message);
         
-        if (animIndex !== undefined && animIndex >= 0 && this.renderer3D) {
-            this.renderer3D.playAnimation(animIndex);
-            this.showMessage(message);
-            
-            // Animar também no widget principal
-            if (this.mainRenderer) {
-                this.mainRenderer.playAnimation(animIndex);
-            }
-            
-            // Voltar à animação padrão
+        // Reproduzir animação configurada
+        if (this.renderer3D && this.is3DModel) {
+            const animIndex = this.data.animationSettings?.[animKey];
+            const defaultAnimIndex = this.data.animationSettings?.default ?? 0;
             const animations = this.renderer3D.getAnimations();
-            if (animations[animIndex]) {
+            
+            // Se tem animação configurada para esta habilidade
+            if (animIndex !== undefined && animIndex >= 0 && animations[animIndex]) {
+                this.renderer3D.playAnimation(animIndex, 'once');
+                
+                // Animar também no widget principal
+                if (this.mainRenderer) {
+                    this.mainRenderer.playAnimation(animIndex, 'once');
+                }
+                
+                // Voltar à animação padrão após a duração
+                const duration = animations[animIndex].duration || 2;
                 setTimeout(() => {
                     if (this.renderer3D && defaultAnimIndex >= 0) {
-                        this.renderer3D.playAnimation(defaultAnimIndex);
+                        this.renderer3D.playAnimation(defaultAnimIndex, 'repeat');
                     }
                     if (this.mainRenderer && defaultAnimIndex >= 0) {
-                        this.mainRenderer.playAnimation(defaultAnimIndex);
+                        this.mainRenderer.playAnimation(defaultAnimIndex, 'repeat');
                     }
-                }, animations[animIndex].duration * 1000);
+                }, duration * 1000);
             }
-        } else {
-            // Fallback para estados padrão
-            if (action === 'pet') this.setState(PET_STATES.HAPPY);
-            if (action === 'play') this.setState(PET_STATES.EXCITED);
-            if (action === 'feed') this.setState(PET_STATES.HAPPY);
-            this.showMessage(message);
-            
-            setTimeout(() => {
-                this.setState(PET_STATES.NEUTRAL);
-            }, 3000);
         }
         
         this.saveData();
@@ -278,22 +365,28 @@ class PetSystem {
                     <div class="pet-message" id="petMessage"></div>
                     <div class="pet-character-wrapper">
                         <div class="pet-character" id="petCharacter">
-                            ${this.getCustomPetImage() || this.getPetSVG()}
+                            <!-- Modelo 3D será carregado aqui -->
                         </div>
                     </div>
                     <div class="pet-name-editable" id="petNameDisplay">${this.data.name}</div>
                 </div>
 
                 <!-- Ações minimalistas -->
-                <div class="pet-actions-minimal">
-                    <button class="pet-action-btn-minimal" data-action="pet" title="Fazer Carinho">
-                        🤗
+                <div class="pet-actions-minimal" id="petActionsContainer">
+                    <button class="pet-action-btn-minimal" data-action="passive" title="Passiva">
+                        ⭐
                     </button>
-                    <button class="pet-action-btn-minimal" data-action="play" title="Brincar">
-                        🎮
+                    <button class="pet-action-btn-minimal" data-action="q" title="Habilidade Q">
+                        🔥
                     </button>
-                    <button class="pet-action-btn-minimal" data-action="feed" title="Alimentar">
-                        🍪
+                    <button class="pet-action-btn-minimal" data-action="w" title="Habilidade W">
+                        💨
+                    </button>
+                    <button class="pet-action-btn-minimal" data-action="e" title="Habilidade E">
+                        ⚡
+                    </button>
+                    <button class="pet-action-btn-minimal" data-action="r" title="Habilidade R">
+                        💥
                     </button>
                 </div>
 
@@ -310,14 +403,28 @@ class PetSystem {
         this.container = container;
         this.attachEventListeners();
         
-        // Carregar Ornn automaticamente
+        // Carregar Ornn automaticamente quando a aba estiver visível
         const modelPath = this.data.model3DPath || 'src/assets/ornn.glb';
-        if (this.data.modelType === '3d') {
-            // Aguardar um pouco para o DOM estar pronto
-            setTimeout(() => {
+        
+        // Carregar modelo imediatamente (será carregado quando a aba for exibida)
+        setTimeout(() => {
+            if (this.container && this.container.style.display !== 'none') {
                 this.init3DModel(modelPath);
-            }, 100);
-        }
+            } else {
+                // Observar mudanças de visibilidade
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.attributeName === 'style' && 
+                            this.container.style.display !== 'none' && 
+                            !this.is3DModel && !this.isLoading3DModel) {
+                            this.init3DModel(modelPath);
+                            observer.disconnect();
+                        }
+                    });
+                });
+                observer.observe(this.container, { attributes: true, attributeFilter: ['style'] });
+            }
+        }, 100);
         
         return container;
     }
@@ -345,12 +452,53 @@ class PetSystem {
                 this.showMessage(`Agora eu me chamo ${this.data.name}! 😊`);
             }
         });
+    }
 
-        // Click no mascote
-        const petCharacter = this.container.querySelector('#petCharacter');
-        petCharacter?.addEventListener('click', () => {
-            this.interact('pet');
-        });
+    // Atualizar ícones dos botões com as habilidades do campeão
+    updateAbilityIcons() {
+        if (!this.championAbilities || !this.container) return;
+
+        const actionsContainer = this.container.querySelector('#petActionsContainer');
+        if (!actionsContainer) return;
+
+        // Mapear ações para habilidades
+        const abilityMapping = {
+            'passive': this.championAbilities.passive, // Passiva
+            'q': this.championAbilities.q,            // Q
+            'w': this.championAbilities.w,            // W
+            'e': this.championAbilities.e,            // E
+            'r': this.championAbilities.r             // R
+        };
+
+        // Atualizar cada botão com o ícone da habilidade
+        actionsContainer.innerHTML = '';
+        
+        for (const [action, ability] of Object.entries(abilityMapping)) {
+            if (ability && ability.icon) {
+                const button = document.createElement('button');
+                button.className = 'pet-action-btn-minimal ability-icon-btn';
+                button.dataset.action = action;
+                button.title = ability.name || action;
+                
+                const img = document.createElement('img');
+                img.src = ability.icon;
+                img.alt = ability.name || action;
+                img.className = 'ability-icon-img';
+                
+                const key = document.createElement('span');
+                key.className = 'ability-key';
+                key.textContent = ability.key;
+                
+                button.appendChild(img);
+                button.appendChild(key);
+                actionsContainer.appendChild(button);
+                
+                // Re-adicionar event listener
+                button.addEventListener('click', () => {
+                    this.interact(action);
+                });
+            }
+        }
     }
 
     async init3DModel(modelPath) {
@@ -359,44 +507,51 @@ class PetSystem {
         
         // Verificar se já foi inicializado ou está carregando
         if (this.renderer3D && this.is3DModel) return;
-        if (this.isLoading3DModel) return; // Evitar chamadas duplicadas
+        if (this.isLoading3DModel) return;
         
         this.isLoading3DModel = true;
         
-        // Limpar conteúdo anterior (SVG ou imagem) antes de carregar o modelo 3D
-        petCharacter.innerHTML = '';
+        // Limpar conteúdo anterior
+        petCharacter.innerHTML = '<div style="color: #fff; text-align: center; padding: 20px;">Carregando...</div>';
         
-        // Criar renderer 3D se não existir
-        if (!this.renderer3D) {
-            const { Pet3DRenderer } = await import('./pet-3d-renderer.js');
-            this.renderer3D = new Pet3DRenderer(petCharacter);
-            await this.renderer3D.init();
-        }
-        
-        // Carregar modelo
-        const success = await this.renderer3D.loadModel(modelPath);
-        if (success) {
-            this.is3DModel = true;
-            this.isLoading3DModel = false;
-            petCharacter.classList.add('model-3d');
-            
-            // Aplicar animação padrão se configurada
-            const defaultAnim = this.data.animationSettings?.default ?? 0;
-            if (defaultAnim >= 0) {
-                setTimeout(() => {
-                    this.renderer3D.playAnimation(defaultAnim);
-                }, 100);
+        try {
+            // Criar renderer 3D se não existir
+            if (!this.renderer3D) {
+                const { Pet3DRenderer } = await import('./pet-3d-renderer.js');
+                this.renderer3D = new Pet3DRenderer(petCharacter, () => this.onMascotClick());
+                await this.renderer3D.init();
             }
             
-            // Atualizar lista de animações
-            this.updateAnimationsList();
+            // Carregar modelo
+            const success = await this.renderer3D.loadModel(modelPath);
             
-            // Popular configurações de animação com valores salvos
-            const animations = this.renderer3D.getAnimations();
-            if (animations && animations.length > 0) {
-                this.populateAnimationSettings(animations);
+            if (success) {
+                this.is3DModel = true;
+                this.isLoading3DModel = false;
+                petCharacter.classList.add('model-3d');
+                
+                // Aplicar animação padrão se configurada
+                const defaultAnim = this.data.animationSettings?.default ?? 0;
+                if (defaultAnim >= 0) {
+                    setTimeout(() => {
+                        this.renderer3D.playAnimation(defaultAnim);
+                    }, 100);
+                }
+                
+                // Atualizar lista de animações
+                this.updateAnimationsList();
+                
+                // Popular configurações de animação com valores salvos
+                const animations = this.renderer3D.getAnimations();
+                if (animations && animations.length > 0) {
+                    this.populateAnimationSettings(animations);
+                }
+            } else {
+                petCharacter.innerHTML = '<div style="color: #ff6b6b; text-align: center; padding: 20px;">Erro ao carregar</div>';
+                this.isLoading3DModel = false;
             }
-        } else {
+        } catch (error) {
+            petCharacter.innerHTML = '<div style="color: #ff6b6b; text-align: center; padding: 20px;">Erro: ' + error.message + '</div>';
             this.isLoading3DModel = false;
         }
     }
@@ -468,9 +623,11 @@ class PetSystem {
             { id: 'animDefault', key: 'default' },
             { id: 'animOnTaskComplete', key: 'onTaskComplete' },
             { id: 'animOnLevelUp', key: 'onLevelUp' },
-            { id: 'animOnPet', key: 'onPet' },
-            { id: 'animOnPlay', key: 'onPlay' },
-            { id: 'animOnFeed', key: 'onFeed' }
+            { id: 'animOnPassive', key: 'onPassive' },
+            { id: 'animOnQ', key: 'onQ' },
+            { id: 'animOnW', key: 'onW' },
+            { id: 'animOnE', key: 'onE' },
+            { id: 'animOnR', key: 'onR' }
         ];
         
         selects.forEach(({ id, key }) => {
@@ -506,10 +663,10 @@ class PetSystem {
                 // Se for animação padrão, aplicar imediatamente
                 if (key === 'default' && animIndex >= 0) {
                     if (this.renderer3D) {
-                        this.renderer3D.playAnimation(animIndex);
+                        this.renderer3D.playAnimation(animIndex, 'repeat');
                     }
                     if (this.mainRenderer) {
-                        this.mainRenderer.playAnimation(animIndex);
+                        this.mainRenderer.playAnimation(animIndex, 'repeat');
                     }
                 }
                 
@@ -545,9 +702,11 @@ class PetSystem {
             { id: 'animDefault', key: 'default', label: 'Animação Padrão' },
             { id: 'animOnTaskComplete', key: 'onTaskComplete', label: 'Ao Completar Tarefa' },
             { id: 'animOnLevelUp', key: 'onLevelUp', label: 'Ao Subir de Nível' },
-            { id: 'animOnPet', key: 'onPet', label: 'Ao Fazer Carinho' },
-            { id: 'animOnPlay', key: 'onPlay', label: 'Ao Brincar' },
-            { id: 'animOnFeed', key: 'onFeed', label: 'Ao Alimentar' }
+            { id: 'animOnPassive', key: 'onPassive', label: 'Passiva (P)' },
+            { id: 'animOnQ', key: 'onQ', label: 'Habilidade Q' },
+            { id: 'animOnW', key: 'onW', label: 'Habilidade W' },
+            { id: 'animOnE', key: 'onE', label: 'Habilidade E' },
+            { id: 'animOnR', key: 'onR', label: 'Habilidade R' }
         ];
         
         selects.forEach(({ id, key, label }) => {
@@ -556,16 +715,11 @@ class PetSystem {
             
             const savedValue = settings[key] !== undefined ? settings[key] : -1;
             
-            // Popular com opção básica e valor salvo
-            select.innerHTML = '<option value="-1">Nenhuma (carregue o modelo para ver todas)</option>';
-            
-            // Se há um valor salvo diferente de -1, adicionar como opção
-            if (savedValue >= 0) {
-                select.innerHTML += `<option value="${savedValue}" selected>Animação ${savedValue + 1} (salva)</option>`;
-            }
+            // Mostrar carregando em todos os selects enquanto não há animações
+            select.innerHTML = '<option value="-1">Carregando...</option>';
             
             // Definir valor
-            select.value = savedValue;
+            select.value = -1;
             
             // Remover listeners antigos (se houver)
             if (select._changeHandler) {
@@ -622,19 +776,6 @@ class PetSystem {
         const achievementsEl = this.container.querySelector('#achievementsList');
         if (achievementsEl) {
             achievementsEl.innerHTML = this.renderAchievements();
-        }
-    }
-
-    updatePetVisual() {
-        if (!this.container) return;
-        
-        // Se for modelo 3D, não atualizar (já renderizado)
-        if (this.is3DModel) return;
-        
-        const petCharacter = this.container.querySelector('#petCharacter');
-        if (petCharacter) {
-            petCharacter.innerHTML = this.getCustomPetImage() || this.getPetSVG();
-            petCharacter.className = `pet-character pet-state-${this.currentState}`;
         }
     }
 
@@ -725,80 +866,6 @@ class PetSystem {
     getUnlockedCount() {
         return this.checkAchievements().filter(a => a.unlocked).length;
     }
-
-    getCustomPetImage() {
-        if (this.data.customImage) {
-            return `<img src="${this.data.customImage}" alt="${this.data.name}" class="pet-custom-image" />`;
-        }
-        return null;
-    }
-
-    getPetSVG() {
-        const color = this.getPetColor();
-        const expression = this.getExpression();
-
-        return `
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <!-- Corpo -->
-                <ellipse cx="100" cy="120" rx="60" ry="50" fill="${color}" opacity="0.9"/>
-                
-                <!-- Cabeça -->
-                <circle cx="100" cy="70" r="45" fill="${color}"/>
-                
-                <!-- Orelhas -->
-                <ellipse cx="70" cy="45" rx="15" ry="25" fill="${color}" opacity="0.8"/>
-                <ellipse cx="130" cy="45" rx="15" ry="25" fill="${color}" opacity="0.8"/>
-                
-                <!-- Olhos -->
-                <circle cx="85" cy="65" r="8" fill="#2a2a2a"/>
-                <circle cx="115" cy="65" r="8" fill="#2a2a2a"/>
-                <circle cx="87" cy="63" r="3" fill="white"/>
-                <circle cx="117" cy="63" r="3" fill="white"/>
-                
-                <!-- Expressão -->
-                ${expression}
-                
-                <!-- Braços -->
-                <ellipse cx="60" cy="110" rx="12" ry="30" fill="${color}" opacity="0.8"/>
-                <ellipse cx="140" cy="110" rx="12" ry="30" fill="${color}" opacity="0.8"/>
-                
-                <!-- Pernas -->
-                <ellipse cx="80" cy="155" rx="15" ry="20" fill="${color}" opacity="0.8"/>
-                <ellipse cx="120" cy="155" rx="15" ry="20" fill="${color}" opacity="0.8"/>
-                
-                <!-- Detalhe de barriga -->
-                <ellipse cx="100" cy="125" rx="35" ry="30" fill="white" opacity="0.3"/>
-            </svg>
-        `;
-    }
-
-    getPetColor() {
-        // Cor muda com o nível
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
-        return colors[this.data.level % colors.length];
-    }
-
-    getExpression() {
-        switch(this.currentState) {
-            case PET_STATES.HAPPY:
-                return '<path d="M 85 85 Q 100 95 115 85" stroke="#2a2a2a" stroke-width="3" fill="none" stroke-linecap="round"/>';
-            case PET_STATES.EXCITED:
-                return `
-                    <path d="M 85 85 Q 100 95 115 85" stroke="#2a2a2a" stroke-width="3" fill="none" stroke-linecap="round"/>
-                    <circle cx="75" cy="80" r="3" fill="#ff6b6b"/>
-                    <circle cx="125" cy="80" r="3" fill="#ff6b6b"/>
-                `;
-            case PET_STATES.SAD:
-                return '<path d="M 85 90 Q 100 85 115 90" stroke="#2a2a2a" stroke-width="3" fill="none" stroke-linecap="round"/>';
-            case PET_STATES.SLEEPING:
-                return `
-                    <line x1="78" y1="65" x2="92" y2="65" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"/>
-                    <line x1="108" y1="65" x2="122" y2="65" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"/>
-                `;
-            default:
-                return '<line x1="85" y1="85" x2="115" y2="85" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"/>';
-        }
-    }
 }
 
 // Instância global
@@ -852,10 +919,15 @@ export function initMainPetWidget() {
         return;
     }
     
+    // Mostrar mensagem de carregamento
+    mainPetCharacter.innerHTML = '<div style="color: #fff; text-align: center; padding: 20px; font-size: 12px;">Carregando...</div>';
+    
     // Importar Pet3DRenderer dinamicamente
     import('./pet-3d-renderer.js').then(module => {
         const { Pet3DRenderer } = module;
-        const miniRenderer = new Pet3DRenderer(mainPetCharacter);
+        const miniRenderer = new Pet3DRenderer(mainPetCharacter, () => {
+            if (petSystem) petSystem.onMascotClick();
+        });
         
         // Definir animação padrão antes de carregar
         miniRenderer.defaultAnimIndex = petSystem.data.animationSettings?.default ?? 0;
@@ -866,7 +938,7 @@ export function initMainPetWidget() {
                 const defaultAnim = petSystem.data.animationSettings?.default ?? 0;
                 if (defaultAnim >= 0) {
                     setTimeout(() => {
-                        miniRenderer.playAnimation(defaultAnim);
+                        miniRenderer.playAnimation(defaultAnim, 'repeat');
                     }, 100);
                 }
             }).catch(() => {});
@@ -891,17 +963,64 @@ export function openPetSettingsModal() {
     
     // Popular settings com animações ou valores salvos
     if (petSystem) {
-        if (petSystem.renderer3D) {
-            // Se o renderer existe, popular com as animações disponíveis
-            const animations = petSystem.renderer3D.getAnimations();
-            if (animations && animations.length > 0) {
-                petSystem.populateAnimationSettings(animations);
-            }
+        // Verificar se há animações carregadas
+        const animations = petSystem.renderer3D?.getAnimations() || [];
+        const hasAnimations = animations.length > 0;
+        
+        if (hasAnimations) {
+            // Modelo carregado com animações - popular tudo
+            petSystem.populateAnimationSettings(animations);
+            populateAnimOnClickSetting(animations);
         } else {
-            // Se o renderer não existe ainda, preencher os selects com valores salvos
+            // Modelo não carregado - mostrar valores salvos
             petSystem.populateAnimationSettingsWithSavedValues();
+            populateAnimOnClickSetting([]);
         }
     }
+}
+
+function populateAnimOnClickSetting(animations = []) {
+    if (!petSystem) return;
+    
+    const select = document.getElementById('animOnClick');
+    if (!select) return;
+    
+    const savedValue = petSystem.data.animOnClick ?? -1;
+    
+    // Se não há animações carregadas, mostrar Carregando em todos
+    if (animations.length === 0) {
+        select.innerHTML = '<option value="-1">Carregando...</option>';
+        select.value = -1;
+        return;
+    }
+    
+    // Limpar opções e adicionar animações disponíveis
+    select.innerHTML = '<option value="-1">Nenhuma</option>';
+    
+    // Adicionar opções de animações disponíveis
+    animations.forEach((anim, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = anim.name || `Animação ${index + 1}`;
+        select.appendChild(option);
+    });
+    
+    // Selecionar valor salvo
+    select.value = savedValue;
+    
+    // Remover listener antigo se existir
+    if (select._changeHandler) {
+        select.removeEventListener('change', select._changeHandler);
+    }
+    
+    // Criar e guardar novo handler
+    select._changeHandler = () => {
+        petSystem.data.animOnClick = parseInt(select.value);
+        petSystem.saveData();
+    };
+    
+    // Adicionar listener
+    select.addEventListener('change', select._changeHandler);
 }
 
 export function closePetSettingsModal() {
