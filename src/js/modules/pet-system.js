@@ -489,15 +489,17 @@ class PetSystem {
                 select.value = settings[key];
             }
             
-            // Remover listeners antigos e adicionar novo
-            const newSelect = select.cloneNode(true);
-            select.parentNode.replaceChild(newSelect, select);
+            // Remover listeners antigos (se houver)
+            if (select._changeHandler) {
+                select.removeEventListener('change', select._changeHandler);
+            }
             
-            newSelect.addEventListener('change', () => {
+            // Criar e guardar referência ao handler
+            select._changeHandler = () => {
                 if (!this.data.animationSettings) {
                     this.data.animationSettings = {};
                 }
-                const animIndex = parseInt(newSelect.value);
+                const animIndex = parseInt(select.value);
                 this.data.animationSettings[key] = animIndex;
                 this.saveData();
                 
@@ -528,7 +530,75 @@ class PetSystem {
                 } else if (this.container) {
                     this.showMessage('⚙️ Configuração salva!');
                 }
-            });
+            };
+            
+            // Adicionar listener
+            select.addEventListener('change', select._changeHandler);
+        });
+    }
+
+    // Preencher configurações com valores salvos (sem precisar do renderer)
+    populateAnimationSettingsWithSavedValues() {
+        const settings = this.data.animationSettings || {};
+        
+        const selects = [
+            { id: 'animDefault', key: 'default', label: 'Animação Padrão' },
+            { id: 'animOnTaskComplete', key: 'onTaskComplete', label: 'Ao Completar Tarefa' },
+            { id: 'animOnLevelUp', key: 'onLevelUp', label: 'Ao Subir de Nível' },
+            { id: 'animOnPet', key: 'onPet', label: 'Ao Fazer Carinho' },
+            { id: 'animOnPlay', key: 'onPlay', label: 'Ao Brincar' },
+            { id: 'animOnFeed', key: 'onFeed', label: 'Ao Alimentar' }
+        ];
+        
+        selects.forEach(({ id, key, label }) => {
+            const select = document.querySelector(`#${id}`);
+            if (!select) return;
+            
+            const savedValue = settings[key] !== undefined ? settings[key] : -1;
+            
+            // Popular com opção básica e valor salvo
+            select.innerHTML = '<option value="-1">Nenhuma (carregue o modelo para ver todas)</option>';
+            
+            // Se há um valor salvo diferente de -1, adicionar como opção
+            if (savedValue >= 0) {
+                select.innerHTML += `<option value="${savedValue}" selected>Animação ${savedValue + 1} (salva)</option>`;
+            }
+            
+            // Definir valor
+            select.value = savedValue;
+            
+            // Remover listeners antigos (se houver)
+            if (select._changeHandler) {
+                select.removeEventListener('change', select._changeHandler);
+            }
+            
+            // Criar e guardar referência ao handler
+            select._changeHandler = () => {
+                if (!this.data.animationSettings) {
+                    this.data.animationSettings = {};
+                }
+                const animIndex = parseInt(select.value);
+                this.data.animationSettings[key] = animIndex;
+                this.saveData();
+                
+                // Mostrar feedback
+                const modal = document.getElementById('petSettingsModal');
+                if (modal && modal.style.display !== 'none') {
+                    const note = modal.querySelector('.settings-note p');
+                    if (note) {
+                        const originalText = note.innerHTML;
+                        note.innerHTML = '✅ <strong>Configuração salva! Abra a aba Mascote para aplicar.</strong>';
+                        note.style.color = '#10b981';
+                        setTimeout(() => {
+                            note.innerHTML = originalText;
+                            note.style.color = '';
+                        }, 3000);
+                    }
+                }
+            };
+            
+            // Adicionar listener
+            select.addEventListener('change', select._changeHandler);
         });
     }
 
@@ -819,11 +889,17 @@ export function openPetSettingsModal() {
     
     modal.style.display = 'flex';
     
-    // Popular settings se tiver animações
-    if (petSystem && petSystem.renderer3D) {
-        const animations = petSystem.renderer3D.getAnimations();
-        if (animations && animations.length > 0) {
-            petSystem.populateAnimationSettings(animations);
+    // Popular settings com animações ou valores salvos
+    if (petSystem) {
+        if (petSystem.renderer3D) {
+            // Se o renderer existe, popular com as animações disponíveis
+            const animations = petSystem.renderer3D.getAnimations();
+            if (animations && animations.length > 0) {
+                petSystem.populateAnimationSettings(animations);
+            }
+        } else {
+            // Se o renderer não existe ainda, preencher os selects com valores salvos
+            petSystem.populateAnimationSettingsWithSavedValues();
         }
     }
 }
