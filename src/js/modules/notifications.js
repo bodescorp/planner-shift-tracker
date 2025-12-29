@@ -26,15 +26,29 @@ export function hideWaterModal() {
 export function startWaterReminder() {
     requestNotificationPermission();
     
-    waterNotificationInterval = setInterval(() => {
+    // Função para mostrar notificação e modal
+    const showWaterNotification = () => {
         showWaterModal();
         
         if ('Notification' in window && Notification.permission === 'granted') {
             new Notification('💧 Hidratação', {
                 body: 'Você bebeu água nos últimos 30 minutos?',
-                icon: '/src/assets/icon-192.svg'
+                icon: '/src/assets/icon-192.svg',
+                badge: '/src/assets/icon-192.svg',
+                tag: 'water-reminder',
+                requireInteraction: false
             });
         }
+    };
+    
+    // Mostrar primeira notificação após 30 minutos
+    setTimeout(() => {
+        showWaterNotification();
+        
+        // Depois continuar mostrando a cada 30 minutos
+        waterNotificationInterval = setInterval(() => {
+            showWaterNotification();
+        }, 30 * 60 * 1000);
     }, 30 * 60 * 1000);
 }
 
