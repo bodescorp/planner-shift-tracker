@@ -75,7 +75,7 @@ export class Pet3DRenderer {
         this.controls.autoRotateSpeed = 0;
         this.controls.minDistance = 2;
         this.controls.maxDistance = 8;
-        this.controls.target.set(0, 0, 0); // Centralizar no modelo
+        this.controls.target.set(1, 1, 3); // Centralizar no modelo
         
         // Iluminação
         const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
