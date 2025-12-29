@@ -38,6 +38,8 @@ export class Pet3DRenderer {
         this.onClickCallback = onClickCallback;
         this.raycaster = null;
         this.mouse = null;
+        this.loadingText = null;
+        this.isLoading = true;
     }
 
     async init() {
@@ -75,6 +77,9 @@ export class Pet3DRenderer {
         // Limpar container e adicionar canvas
         this.container.innerHTML = '';
         this.container.appendChild(this.renderer.domElement);
+        
+        // Criar texto de carregamento
+        this.createLoadingText();
         
         // Adicionar evento de clique no canvas (apenas uma vez)
         if (!this.clickHandlerAdded) {
@@ -175,7 +180,11 @@ export class Pet3DRenderer {
                             });
                             
                             // NÃO reproduzir animação automaticamente aqui
-                            // A animação padrão será definida externamente via playAnimation()
+                            // A animação padrão será definida externamente via playAnimation()                            
+                            // Remover texto de carregamento quando animações carregam
+                            this.hideLoadingText();                            
+                            // Remover texto de carregamento quando animações carregam
+                            this.hideLoadingText();
                         }
                         
                         // Iniciar loop de animação
@@ -352,13 +361,7 @@ export class Pet3DRenderer {
         const newAction = this.currentActions[index];
         
         // Parar todas as outras animações (exceto a nova)
-        this.currentActions.forEach((action, i) => {
-            if (i !== index && action.isRunning()) {
-                action.fadeOut(this.fadeDuration);
-            }
-        });
-        
-        // Configurar e reproduzir a nova animação imediatamente
+        // Configurar a nova animação primeiro
         newAction.stop();
         newAction.time = 0;
         newAction.timeScale = this.animationSpeed;
@@ -372,9 +375,15 @@ export class Pet3DRenderer {
             newAction.clampWhenFinished = true;
         }
         
-        // Iniciar com fadeIn para transição suave
-        newAction.reset();
-        newAction.fadeIn(this.fadeDuration);
+        // Fazer fadeOut apenas das outras animações em execução
+        this.currentActions.forEach((action, i) => {
+            if (i !== index && action.isRunning()) {
+                action.fadeOut(this.fadeDuration);
+            }
+        });
+        
+        // Iniciar a nova animação com peso completo (fadeIn com duração 0) ou pequeno fade
+        newAction.setEffectiveWeight(1);
         newAction.play();
     }
 
@@ -419,5 +428,40 @@ export class Pet3DRenderer {
             this.pauseAllAnimations();
             return false; // Paused
         }
+    }
+    
+    createLoadingText() {
+        // Criar elemento de texto de carregamento
+        const loadingDiv = document.createElement('div');
+        loadingDiv.style.position = 'absolute';
+        loadingDiv.style.top = '50%';
+        loadingDiv.style.left = '50%';
+        loadingDiv.style.transform = 'translate(-50%, -50%)';
+        loadingDiv.style.color = '#a78bfa';
+        loadingDiv.style.fontSize = '18px';
+        loadingDiv.style.fontWeight = 'bold';
+        loadingDiv.style.textAlign = 'center';
+        loadingDiv.style.pointerEvents = 'none';
+        loadingDiv.style.zIndex = '10';
+        loadingDiv.textContent = 'Carregando...';
+        
+        this.container.style.position = 'relative';
+        this.container.appendChild(loadingDiv);
+        this.loadingText = loadingDiv;
+    }
+    
+    hideLoadingText() {
+        if (this.loadingText && this.loadingText.parentElement) {
+            this.loadingText.parentElement.removeChild(this.loadingText);
+            this.loadingText = null;
+        }
+        this.isLoading = false;
+    }
+    
+    showLoadingText() {
+        if (!this.loadingText && this.container) {
+            this.createLoadingText();
+        }
+        this.isLoading = true;
     }
 }
