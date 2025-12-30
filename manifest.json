@@ -1,12 +1,13 @@
 {
-  "name": "Cronograma",
+  "name": "Cronograma 12x36",
   "short_name": "Cronograma",
-  "description": "Gerenciador de plantão 12x36",
+  "description": "Seu assistente pessoal para gerenciar rotina em escala 12x36 com atividades, meditação e lembretes de água",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#1a1a1a",
-  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "lifestyle", "health"],
   "icons": [
     {
       "src": "src/assets/icon-192.svg",
@@ -20,5 +21,37 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Cronograma",
+      "short_name": "Agenda",
+      "description": "Ver atividades do dia",
+      "url": "./index.html",
+      "icons": [{ "src": "src/assets/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Meditação",
+      "short_name": "Meditar",
+      "description": "Acessar player de meditação",
+      "url": "./index.html#meditation",
+      "icons": [{ "src": "src/assets/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Relatório",
+      "short_name": "Stats",
+      "description": "Ver progresso semanal",
+      "url": "./index.html#report",
+      "icons": [{ "src": "src/assets/icon-192.svg", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text"
+    }
+  }
 }
