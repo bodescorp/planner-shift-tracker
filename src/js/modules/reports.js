@@ -72,6 +72,7 @@ export function generateReport() {
     const weekKey = getWeekKey(today);
     const reports = JSON.parse(localStorage.getItem('weeklyReports') || '{}');
     const waterData = JSON.parse(localStorage.getItem('waterData') || '{}');
+    const petData = JSON.parse(localStorage.getItem('petData') || '{}');
     
     const currentWeekReport = reports[weekKey] || {
         activities: { total: 0, completed: 0, percentage: 0 },
@@ -81,6 +82,31 @@ export function generateReport() {
     
     const waterToday = waterData[today.toDateString()] || 0;
     
+    // Calcular estatísticas gerais
+    const allReports = Object.values(reports);
+    const totalWeeks = allReports.length;
+    const avgCompletionRate = totalWeeks > 0 
+        ? Math.round(allReports.reduce((sum, r) => sum + r.activities.percentage, 0) / totalWeeks)
+        : 0;
+    
+    // Calcular streak (semanas consecutivas acima de 80%)
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let tempStreak = 0;
+    const sortedKeys = Object.keys(reports).sort().reverse();
+    
+    sortedKeys.forEach(key => {
+        if (reports[key].activities.percentage >= 80) {
+            tempStreak++;
+            if (key === weekKey) currentStreak = tempStreak;
+        } else {
+            if (tempStreak > bestStreak) bestStreak = tempStreak;
+            tempStreak = 0;
+        }
+    });
+    if (tempStreak > bestStreak) bestStreak = tempStreak;
+    
+    // Últimas 4 semanas
     const last4Weeks = [];
     for (let i = 0; i < 4; i++) {
         const date = new Date();
@@ -102,43 +128,87 @@ export function generateReport() {
         ? Math.round(currentWeekReport.waterTotal / 7) 
         : 0;
     
+    // Conquistas do mascote
+    const petLevel = petData.level || 1;
+    const petXP = petData.xp || 0;
+    const petTasks = petData.totalActivitiesCompleted || 0;
+    
+    // Dias até limpar (próxima segunda)
+    const daysUntilClean = (8 - today.getDay()) % 7 || 7;
+    
     reportContent.innerHTML = `
         <div class="report-section">
             <h3>📊 Semana Atual</h3>
             <div class="report-grid">
                 <div class="report-card">
-                    <div class="report-card-title">Atividades</div>
-                    <div class="report-card-value">${currentWeekReport.activities.completed}/${currentWeekReport.activities.total}</div>
-                    <div class="report-card-subtitle">${currentWeekReport.activities.percentage}% concluído</div>
+                    <div class="report-card-title">Conclusão</div>
+                    <div class="report-card-value">${currentWeekReport.activities.percentage}%</div>
+                    <div class="report-card-subtitle">${currentWeekReport.activities.completed} de ${currentWeekReport.activities.total} atividades</div>
+                    <div class="progress-bar-mini" style="margin-top: 12px;">
+                        <div class="progress-fill-mini" style="width: ${currentWeekReport.activities.percentage}%"></div>
+                    </div>
                 </div>
                 <div class="report-card">
-                    <div class="report-card-title">Dias Completos</div>
-                    <div class="report-card-value">${currentWeekReport.completedDays}/7</div>
-                    <div class="report-card-subtitle">100% concluídos</div>
+                    <div class="report-card-title">Dias 100%</div>
+                    <div class="report-card-value">${currentWeekReport.completedDays}<span style="font-size: 1.2rem; opacity: 0.5;">/7</span></div>
+                    <div class="report-card-subtitle">${Math.round((currentWeekReport.completedDays / 7) * 100)}% dos dias completos</div>
                 </div>
                 <div class="report-card">
-                    <div class="report-card-title">💧 Água (Hoje)</div>
+                    <div class="report-card-title">💧 Hoje</div>
                     <div class="report-card-value">${waterToday}</div>
-                    <div class="report-card-subtitle">copos hoje</div>
+                    <div class="report-card-subtitle">${waterToday >= 8 ? '✅ Meta atingida!' : `Faltam ${8 - waterToday} copos`}</div>
                 </div>
                 <div class="report-card">
-                    <div class="report-card-title">💧 Água (Semana)</div>
+                    <div class="report-card-title">💧 Semana</div>
                     <div class="report-card-value">${currentWeekReport.waterTotal}</div>
-                    <div class="report-card-subtitle">média ${avgWater}/dia</div>
+                    <div class="report-card-subtitle">média ${avgWater}/dia ${avgWater >= 8 ? '✅' : ''}</div>
                 </div>
             </div>
         </div>
         
+        ${totalWeeks > 0 ? `
+            <div class="report-section">
+                <h3>🎯 Desempenho Geral</h3>
+                <div class="report-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                    <div class="report-card">
+                        <div class="report-card-title">Média Geral</div>
+                        <div class="report-card-value">${avgCompletionRate}%</div>
+                        <div class="report-card-subtitle">${totalWeeks} semanas</div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-card-title">Sequência Atual</div>
+                        <div class="report-card-value">${currentStreak}</div>
+                        <div class="report-card-subtitle">${currentStreak === 1 ? 'semana' : 'semanas'} ≥80%</div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-card-title">Melhor Sequência</div>
+                        <div class="report-card-value">${bestStreak}</div>
+                        <div class="report-card-subtitle">${bestStreak === 1 ? 'semana' : 'semanas'} consecutivas</div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-card-title">🐾 Mascote</div>
+                        <div class="report-card-value">Nv.${petLevel}</div>
+                        <div class="report-card-subtitle">${petTasks} tarefas completas</div>
+                    </div>
+                </div>
+            </div>
+        ` : ''}
+        
         ${last4Weeks.length > 0 ? `
             <div class="report-section">
-                <h3>📈 Histórico (Últimas 4 Semanas)</h3>
+                <h3>📈 Histórico Recente</h3>
                 <div class="report-list">
-                    ${last4Weeks.map(week => `
+                    ${last4Weeks.map((week, idx) => `
                         <div class="report-list-item">
-                            <span class="report-list-label">${week.week}</span>
-                            <span class="report-list-value">
-                                ${week.activities.percentage}% • ${week.completedDays} dias • ${week.waterTotal}💧
-                            </span>
+                            <div>
+                                <span class="report-list-label">${week.week}</span>
+                                ${idx === 0 ? '<span style="font-size: 0.75rem; opacity: 0.5; margin-left: 8px;">(atual)</span>' : ''}
+                            </div>
+                            <div style="display: flex; gap: 16px; align-items: center;">
+                                <span class="report-metric">${week.activities.percentage}%</span>
+                                <span class="report-metric">${week.completedDays}d</span>
+                                <span class="report-metric">${week.waterTotal}💧</span>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
@@ -146,26 +216,48 @@ export function generateReport() {
         ` : ''}
         
         <div class="report-section">
-            <h3>💡 Informações</h3>
+            <h3>💡 Informações do Sistema</h3>
             <div class="report-list">
                 <div class="report-list-item">
-                    <span class="report-list-label">📅 Limpeza Automática</span>
-                    <span class="report-list-value">Toda segunda 00:30</span>
+                    <span class="report-list-label">📅 Próxima Limpeza</span>
+                    <span class="report-list-value">${daysUntilClean === 1 ? 'Amanhã' : daysUntilClean === 0 ? 'Hoje' : `${daysUntilClean} dias`} (seg 00:30)</span>
                 </div>
                 <div class="report-list-item">
-                    <span class="report-list-label">💧 Meta de Água</span>
-                    <span class="report-list-value">8-10 copos/dia</span>
+                    <span class="report-list-label">💧 Meta Diária</span>
+                    <span class="report-list-value">8-10 copos</span>
                 </div>
                 <div class="report-list-item">
                     <span class="report-list-label">🔔 Lembretes</span>
-                    <span class="report-list-value">A cada 30 minutos</span>
+                    <span class="report-list-value">A cada 30 min</span>
                 </div>
                 <div class="report-list-item">
                     <span class="report-list-label">🎯 Meta Semanal</span>
-                    <span class="report-list-value">80%+ atividades</span>
+                    <span class="report-list-value">≥80% atividades</span>
+                </div>
+                <div class="report-list-item">
+                    <span class="report-list-label">📊 Total Registrado</span>
+                    <span class="report-list-value">${totalWeeks} ${totalWeeks === 1 ? 'semana' : 'semanas'}</span>
                 </div>
             </div>
         </div>
+        
+        ${currentWeekReport.activities.percentage >= 80 ? `
+            <div class="report-achievement">
+                <div class="achievement-icon">🎉</div>
+                <div class="achievement-text">
+                    <strong>Parabéns!</strong>
+                    <span>Você está indo muito bem esta semana!</span>
+                </div>
+            </div>
+        ` : currentWeekReport.activities.percentage >= 50 ? `
+            <div class="report-achievement warning">
+                <div class="achievement-icon">💪</div>
+                <div class="achievement-text">
+                    <strong>Continue!</strong>
+                    <span>Você está no caminho certo, não desista!</span>
+                </div>
+            </div>
+        ` : ''}
     `;
 }
 

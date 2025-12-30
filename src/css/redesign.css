@@ -1901,3 +1901,246 @@
     color: rgba(0, 0, 0, 0.5);
 }
 
+/* ========================================
+   MODAL DE RELATÓRIO - REDESIGN
+   ======================================== */
+
+.report-section {
+    margin-bottom: 32px;
+}
+
+.report-section:last-child {
+    margin-bottom: 0;
+}
+
+.report-section h3 {
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0 0 20px 0;
+    letter-spacing: 0.5px;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 0;
+}
+
+.report-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.report-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.report-card-title {
+    font-size: 0.85rem;
+    font-weight: 100;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.report-card-value {
+    font-size: 2rem;
+    font-weight: 200;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 6px;
+}
+
+.report-card-subtitle {
+    font-size: 0.8rem;
+    font-weight: 100;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.report-list {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.report-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s ease;
+}
+
+.report-list-item:last-child {
+    border-bottom: none;
+}
+
+.report-list-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.report-list-label {
+    font-size: 0.9rem;
+    font-weight: 200;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.report-list-value {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Tema Claro - Modal Relatório */
+[data-theme="light"] .report-section h3 {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="light"] .report-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .report-card:hover {
+    background: #f9f9f9;
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .report-card-title {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .report-card-value {
+    color: rgba(0, 0, 0, 0.95);
+}
+
+[data-theme="light"] .report-card-subtitle {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .report-list {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .report-list-item {
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .report-list-item:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .report-list-label {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="light"] .report-list-value {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+/* Elementos adicionais do relatório */
+.progress-bar-mini {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill-mini {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(16, 185, 129, 1));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.report-metric {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.8);
+    min-width: 45px;
+    text-align: right;
+}
+
+.report-achievement {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    margin-top: 24px;
+}
+
+.report-achievement.warning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.05));
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.achievement-icon {
+    font-size: 36px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.achievement-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.achievement-text strong {
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.achievement-text span {
+    font-size: 0.85rem;
+    font-weight: 100;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Tema Claro - Elementos adicionais */
+[data-theme="light"] .progress-bar-mini {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .progress-fill-mini {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.8), rgba(16, 185, 129, 1));
+}
+
+[data-theme="light"] .report-metric {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="light"] .report-achievement {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.03));
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="light"] .report-achievement.warning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(251, 191, 36, 0.03));
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+[data-theme="light"] .achievement-text strong {
+    color: rgba(0, 0, 0, 0.95);
+}
+
+[data-theme="light"] .achievement-text span {
+    color: rgba(0, 0, 0, 0.6);
+}
+
