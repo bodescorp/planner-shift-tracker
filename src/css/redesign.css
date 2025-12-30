@@ -1827,3 +1827,77 @@
     font-weight: 100;
 }
 
+/* ========================================
+   MODAL DE EXPORTAÇÃO - TEMA CLARO
+   ======================================== */
+
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.export-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.export-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.export-icon {
+    font-size: 32px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.export-btn strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 4px;
+}
+
+.export-btn small {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 100;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Tema Claro - Modal Exportação */
+[data-theme="light"] .export-btn {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .export-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .export-btn strong {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+[data-theme="light"] .export-btn small {
+    color: rgba(0, 0, 0, 0.5);
+}
+
