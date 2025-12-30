@@ -1,11 +1,12 @@
 // ========================================
-// GERENCIADOR DE ABAS/PÁGINAS (MOBILE)
+// GERENCIADOR DE ABAS/PÁGINAS (MOBILE + DESKTOP)
 // ========================================
 
 import { createPetContent, ensurePetModelLoaded } from './pet-system.js';
 
 export function initTabsManager() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+    // Selecionar botões de ambos os menus (mobile e desktop)
+    const tabButtons = document.querySelectorAll('.tab-btn, .top-nav-btn');
     const mainContent = document.getElementById('mainContent');
     const meditationContent = createMeditationContent();
     const petContent = createPetContent();
@@ -16,22 +17,47 @@ export function initTabsManager() {
 
     // Controlar visibilidade das "páginas"
     function showPage(pageId) {
+        const weekSelector = document.querySelector('.week-selector');
+        const header = document.querySelector('header');
+        
         // Esconder tudo primeiro
         mainContent.classList.add('hidden');
         meditationContent.style.display = 'none';
         petContent.style.display = 'none';
         notesContent.style.display = 'none';
+        
+        // Sempre esconder primeiro
+        if (weekSelector) {
+            weekSelector.style.display = 'none';
+            weekSelector.classList.add('hidden');
+        }
+        if (header) {
+            header.style.display = 'none';
+            header.classList.add('hidden');
+        }
 
         // Mostrar a página selecionada
         if (pageId === 'schedule') {
             mainContent.classList.remove('hidden');
-        } else if (pageId === 'meditation') {
-            meditationContent.style.display = 'block';
-        } else if (pageId === 'pet') {
-            petContent.style.display = 'block';
-            setTimeout(() => ensurePetModelLoaded(), 100);
-        } else if (pageId === 'notes') {
-            notesContent.style.display = 'block';
+            // Mostrar elementos do cronograma
+            if (weekSelector) {
+                weekSelector.style.display = 'flex';
+                weekSelector.classList.remove('hidden');
+            }
+            if (header) {
+                header.style.display = 'block';
+                header.classList.remove('hidden');
+            }
+        } else {
+            // Garantir que ficam escondidos em outras abas
+            if (pageId === 'meditation') {
+                meditationContent.style.display = 'block';
+            } else if (pageId === 'pet') {
+                petContent.style.display = 'block';
+                setTimeout(() => ensurePetModelLoaded(), 100);
+            } else if (pageId === 'notes') {
+                notesContent.style.display = 'block';
+            }
         }
     }
 
@@ -40,11 +66,15 @@ export function initTabsManager() {
         button.addEventListener('click', () => {
             const targetTab = button.dataset.tab;
 
-            // Remover active de todos
-            tabButtons.forEach(btn => btn.classList.remove('active'));
+            // Remover active de todos os botões (mobile e desktop)
+            document.querySelectorAll('.tab-btn, .top-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
 
-            // Adicionar active no clicado
-            button.classList.add('active');
+            // Adicionar active em todos os botões correspondentes à mesma aba
+            document.querySelectorAll(`[data-tab="${targetTab}"]`).forEach(btn => {
+                btn.classList.add('active');
+            });
 
             // Mostrar página correspondente
             showPage(targetTab);
@@ -56,12 +86,19 @@ export function initTabsManager() {
 
     // Carregar aba salva ou mostrar cronograma por padrão
     const savedTab = localStorage.getItem('activeTab') || 'schedule';
-    const activeButton = document.querySelector(`[data-tab="${savedTab}"]`);
-    if (activeButton) {
-        activeButton.click();
-    } else {
-        showPage('schedule');
-    }
+    
+    // Garantir que a página seja mostrada corretamente após o carregamento
+    setTimeout(() => {
+        const savedTabButtons = document.querySelectorAll(`[data-tab="${savedTab}"]`);
+        if (savedTabButtons.length > 0) {
+            // Ativar visualmente os botões
+            savedTabButtons.forEach(btn => btn.classList.add('active'));
+            // Mostrar a página
+            showPage(savedTab);
+        } else {
+            showPage('schedule');
+        }
+    }, 100);
 }
 
 // Criar conteúdo da página de meditação
