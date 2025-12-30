@@ -136,9 +136,14 @@ export class SwipeGestures {
      */
     setupPullToRefresh() {
         let pullStartY = 0;
+        let pullStartX = 0;
         let pullMoveY = 0;
+        let pullMoveX = 0;
         let refreshTriggered = false;
-        const threshold = 80;
+        let canPull = false;
+        let isPulling = false;
+        const threshold = 120;
+        const horizontalTolerance = 30; // Máximo movimento horizontal permitido
 
         const pullIndicator = document.createElement('div');
         pullIndicator.className = 'pull-to-refresh-indicator';
@@ -148,34 +153,93 @@ export class SwipeGestures {
         `;
         document.body.appendChild(pullIndicator);
 
+        const resetPull = () => {
+            canPull = false;
+            isPulling = false;
+            pullStartY = 0;
+            pullStartX = 0;
+            pullMoveY = 0;
+            pullMoveX = 0;
+            pullIndicator.style.transform = '';
+            pullIndicator.style.opacity = '0';
+            pullIndicator.classList.remove('ready');
+        };
+
         document.addEventListener('touchstart', (e) => {
-            if (window.scrollY === 0 && !document.querySelector('.modal.active')) {
-                pullStartY = e.touches[0].clientY;
+            // Verificações rigorosas para permitir pull
+            if (window.scrollY !== 0) {
+                resetPull();
+                return;
             }
+
+            const target = e.target;
+            
+            // Ignorar se está em modal, menu ou elementos interativos
+            if (document.querySelector('.modal.active, .side-menu.active') ||
+                target.closest('button, a, input, select, textarea, .pet-viewer, canvas')) {
+                resetPull();
+                return;
+            }
+
+            // Verificar elementos com scroll próprio
+            const scrollableParent = target.closest('.tab-content, .modal-content, .scrollable');
+            if (scrollableParent && scrollableParent.scrollTop > 0) {
+                resetPull();
+                return;
+            }
+
+            // Permitir pull apenas se todas as condições forem atendidas
+            canPull = true;
+            isPulling = false;
+            pullStartY = e.touches[0].clientY;
+            pullStartX = e.touches[0].clientX;
         }, { passive: true });
 
         document.addEventListener('touchmove', (e) => {
-            if (pullStartY && !refreshTriggered) {
-                pullMoveY = e.touches[0].clientY - pullStartY;
+            if (!canPull || refreshTriggered) {
+                return;
+            }
+
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            pullMoveY = currentY - pullStartY;
+            pullMoveX = Math.abs(currentX - pullStartX);
+
+            // Se está rolando para cima ou muito na horizontal, cancela
+            if (pullMoveY <= 0 || pullMoveX > horizontalTolerance) {
+                resetPull();
+                return;
+            }
+
+            // Se saiu do topo, cancela
+            if (window.scrollY > 0) {
+                resetPull();
+                return;
+            }
+
+            // Só ativa pulling após movimento vertical significativo
+            if (pullMoveY > 30 && pullMoveX < horizontalTolerance) {
+                isPulling = true;
+            }
+
+            // Atualizar UI do indicador (sem preventDefault)
+            if (isPulling && pullMoveY < 250) {
+                const progress = Math.min(pullMoveY / threshold, 1);
+                pullIndicator.style.transform = `translateY(${Math.min(pullMoveY, threshold)}px)`;
+                pullIndicator.style.opacity = progress;
                 
-                if (pullMoveY > 0 && pullMoveY < 200) {
-                    e.preventDefault();
-                    pullIndicator.style.transform = `translateY(${Math.min(pullMoveY, threshold)}px)`;
-                    pullIndicator.style.opacity = Math.min(pullMoveY / threshold, 1);
-                    
-                    if (pullMoveY >= threshold) {
-                        pullIndicator.classList.add('ready');
-                        pullIndicator.querySelector('.pull-text').textContent = 'Solte para atualizar';
-                    } else {
-                        pullIndicator.classList.remove('ready');
-                        pullIndicator.querySelector('.pull-text').textContent = 'Puxe para atualizar';
-                    }
+                if (progress >= 0.9) {
+                    pullIndicator.classList.add('ready');
+                    pullIndicator.querySelector('.pull-text').textContent = 'Solte para atualizar';
+                } else {
+                    pullIndicator.classList.remove('ready');
+                    pullIndicator.querySelector('.pull-text').textContent = 'Puxe para atualizar';
                 }
             }
-        }, { passive: false });
+        }, { passive: true }); // Mudado para passive: true
 
         document.addEventListener('touchend', () => {
-            if (pullMoveY >= threshold && !refreshTriggered) {
+            if (isPulling && pullMoveY >= threshold && !refreshTriggered && window.scrollY === 0) {
                 refreshTriggered = true;
                 pullIndicator.classList.add('refreshing');
                 pullIndicator.querySelector('.pull-text').textContent = 'Atualizando...';
@@ -184,18 +248,12 @@ export class SwipeGestures {
                     navigator.vibrate(50);
                 }
 
-                // Simular refresh
                 setTimeout(() => {
                     location.reload();
-                }, 1000);
+                }, 800);
             } else {
-                pullIndicator.style.transform = '';
-                pullIndicator.style.opacity = '0';
-                pullIndicator.classList.remove('ready');
+                resetPull();
             }
-            
-            pullStartY = 0;
-            pullMoveY = 0;
         }, { passive: true });
     }
 }
