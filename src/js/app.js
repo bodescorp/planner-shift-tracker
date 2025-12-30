@@ -18,6 +18,21 @@ import { registerServiceWorker } from './modules/service-worker-register.js';
 import { initTabsManager } from './modules/tabs-manager.js';
 import { initMeditationPlayer } from './modules/meditation-player.js';
 import { initPetSystem, initMainPetWidget } from './modules/pet-system.js';
+import { Accessibility } from './modules/accessibility.js';
+import { getToast } from './modules/toast.js';
+import { getLoadingManager } from './modules/loading-manager.js';
+import SwipeGestures from './modules/swipe-gestures.js';
+import AnimationManager from './modules/animations.js';
+import SearchManager from './modules/search.js';
+import ScrollToTop from './modules/scroll-to-top.js';
+import ThemeManager from './modules/theme-manager.js';
+import DataExporter from './modules/data-exporter.js';
+import TooltipManager from './modules/tooltips.js';
+import EmptyStates from './modules/empty-states.js';
+
+// Instâncias globais para uso em toda aplicação
+window.toast = getToast();
+window.loader = getLoadingManager();
 
 // ========================================
 // INICIALIZAÇÃO
@@ -28,8 +43,19 @@ try {
     localStorage.setItem('test', 'ok');
     localStorage.removeItem('test');
 } catch (e) {
-    // Erro de acesso ao localStorage
+    window.toast.error('Erro ao acessar armazenamento local. Algumas funcionalidades podem não funcionar.');
 }
+
+// Inicializar acessibilidade e UX enhancements
+new Accessibility();
+new SwipeGestures();
+new AnimationManager();
+new SearchManager();
+new ScrollToTop();
+new ThemeManager();
+new DataExporter();
+new TooltipManager();
+new EmptyStates();
 
 // Inicializar módulos
 initMenu();

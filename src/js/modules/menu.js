@@ -16,12 +16,22 @@ import { openPetSettingsModal, closePetSettingsModal } from './pet-system.js';
 export function openMenu() {
     sideMenu.classList.add('active');
     menuOverlay.classList.add('active');
+    // Esconder o botão hambúrguer quando o menu abre
+    if (menuToggle) {
+        menuToggle.style.opacity = '0';
+        menuToggle.style.pointerEvents = 'none';
+    }
     updateMenuIndicators();
 }
 
 export function closeMenu() {
     sideMenu.classList.remove('active');
     menuOverlay.classList.remove('active');
+    // Mostrar o botão hambúrguer quando o menu fecha
+    if (menuToggle) {
+        menuToggle.style.opacity = '1';
+        menuToggle.style.pointerEvents = 'all';
+    }
 }
 
 export function updateMenuIndicators() {

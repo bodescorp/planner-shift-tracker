@@ -94,7 +94,16 @@ function initPlayer() {
     function updateProgress() {
         if (audio.duration) {
             const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.setProperty('--progress', `${progress}%`);
+            progressBar.style.width = `${progress}%`;
+            
+            // Atualizar displays de tempo (versão separada)
+            const timeCurrent = document.getElementById('timeCurrent');
+            const timeTotal = document.getElementById('timeTotal');
+            
+            if (timeCurrent) timeCurrent.textContent = formatTime(audio.currentTime);
+            if (timeTotal) timeTotal.textContent = formatTime(audio.duration);
+            
+            // Manter compatibilidade com versão antiga se existir
             if (timeDisplay) timeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
         }
     }

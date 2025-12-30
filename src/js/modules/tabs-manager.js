@@ -105,29 +105,60 @@ export function initTabsManager() {
 function createMeditationContent() {
     const container = document.createElement('div');
     container.id = 'meditationPage';
-    container.className = 'page-content';
+    container.className = 'page-content meditation-page';
     container.style.display = 'none';
     container.innerHTML = `
-        <div class="page-header">
-            <h2>🧘 Meditação</h2>
-            <p class="page-subtitle">Pratique mindfulness com nossos áudios guiados</p>
-        </div>
-        <div class="meditation-container">
-            <div class="audio-card">
-                <div class="audio-info-display">
-                    <span class="audio-title-large" id="audioTitle">Carregando...</span>
-                    <span class="audio-desc">Áudio do dia selecionado automaticamente</span>
+        <div class="meditation-wrapper">
+            <div class="meditation-header-section">
+                <div class="meditation-icon-circle">🧘</div>
+                <h1 class="meditation-title">Meditação</h1>
+                <p class="meditation-subtitle">Pratique mindfulness com áudios guiados</p>
+            </div>
+            
+            <div class="meditation-player-card">
+                <div class="audio-info-section">
+                    <div class="audio-emoji">🎵</div>
+                    <div class="audio-text-wrapper">
+                        <h2 class="audio-title" id="audioTitle">Carregando...</h2>
+                        <p class="audio-description">Áudio do dia selecionado automaticamente</p>
+                    </div>
                 </div>
-                <div class="progress-container-large">
-                    <div class="progress-bar" id="progressBar"></div>
-                    <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                
+                <div class="progress-section">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressBar"></div>
+                    </div>
+                    <div class="time-display-section">
+                        <span class="time-current" id="timeCurrent">0:00</span>
+                        <span class="time-separator">/</span>
+                        <span class="time-total" id="timeTotal">0:00</span>
+                    </div>
                 </div>
-                <div class="player-buttons-large">
-                    <button class="control-btn" id="prevBtn" aria-label="Anterior">⏮️</button>
-                    <button class="control-btn play-btn" id="playBtn" aria-label="Play/Pause">▶️</button>
-                    <button class="control-btn" id="nextBtn" aria-label="Próximo">⏭️</button>
+                
+                <div class="controls-section">
+                    <button class="player-control-btn player-prev" id="prevBtn" aria-label="Anterior">
+                        <span class="btn-icon">⏮️</span>
+                    </button>
+                    <button class="player-control-btn player-play" id="playBtn" aria-label="Play/Pause">
+                        <span class="btn-icon">▶️</span>
+                    </button>
+                    <button class="player-control-btn player-next" id="nextBtn" aria-label="Próximo">
+                        <span class="btn-icon">⏭️</span>
+                    </button>
+                </div>
+                
+                <div class="meditation-tips">
+                    <div class="tip-item">
+                        <span class="tip-icon">💡</span>
+                        <span class="tip-text">Use fones de ouvido para melhor experiência</span>
+                    </div>
+                    <div class="tip-item">
+                        <span class="tip-icon">🌙</span>
+                        <span class="tip-text">Pratique em um ambiente calmo e silencioso</span>
+                    </div>
                 </div>
             </div>
+            
             <audio id="meditationAudio" preload="metadata"></audio>
         </div>
     `;

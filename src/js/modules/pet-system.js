@@ -338,65 +338,106 @@ class PetSystem {
         container.className = 'page-content pet-page';
         container.style.display = 'none';
         container.innerHTML = `
-            <div class="pet-minimal-container">
-                <!-- Stats compactos -->
-                <div class="pet-stats-minimal">
-                    <div class="stat-badge">
-                        <span class="stat-icon">⚡</span>
-                        <span class="stat-text">Nv.<strong id="petLevel">${this.data.level}</strong></span>
-                    </div>
-                    <div class="stat-badge">
-                        <span class="stat-icon">✨</span>
-                        <span class="stat-text"><strong id="petXP">${this.data.xp}</strong>/${this.getXPForNextLevel()}</span>
-                    </div>
-                    <div class="stat-badge">
-                        <span class="stat-icon">🎯</span>
-                        <span class="stat-text"><strong id="petActivities">${this.data.totalActivitiesCompleted}</strong></span>
-                    </div>
+            <div class="pet-page-wrapper">
+                <!-- Cabeçalho -->
+                <div class="pet-header-section">
+                    <div class="pet-icon-circle">🐾</div>
+                    <h1 class="pet-title">Mascote</h1>
+                    <p class="pet-subtitle">Seu companheiro de jornada</p>
                 </div>
 
-                <!-- Barra XP -->
-                <div class="pet-xp-bar-minimal">
-                    <div class="pet-xp-fill" id="petXPFill" style="width: ${(this.data.xp / this.getXPForNextLevel()) * 100}%"></div>
-                </div>
+                <!-- Card do mascote -->
+                <div class="pet-card-main">
+                    <!-- Nome editável -->
+                    <div class="pet-name-section">
+                        <h2 class="pet-name" id="petNameDisplay">${this.data.name}</h2>
+                        <button class="pet-name-edit-btn" id="editNameBtn" aria-label="Editar nome">✏️</button>
+                    </div>
 
-                <!-- Mascote no Centro -->
-                <div class="pet-display-minimal" id="petDisplay">
-                    <div class="pet-message" id="petMessage"></div>
-                    <div class="pet-character-wrapper">
-                        <div class="pet-character" id="petCharacter">
-                            <!-- Modelo 3D será carregado aqui -->
+                    <!-- Stats em linha -->
+                    <div class="pet-stats-row">
+                        <div class="stat-item">
+                            <span class="stat-emoji">⚡</span>
+                            <div class="stat-info">
+                                <span class="stat-label">Nível</span>
+                                <span class="stat-value" id="petLevel">${this.data.level}</span>
+                            </div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-emoji">✨</span>
+                            <div class="stat-info">
+                                <span class="stat-label">XP</span>
+                                <span class="stat-value" id="petXP">${this.data.xp}/${this.getXPForNextLevel()}</span>
+                            </div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-emoji">🎯</span>
+                            <div class="stat-info">
+                                <span class="stat-label">Tarefas</span>
+                                <span class="stat-value" id="petActivities">${this.data.totalActivitiesCompleted}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="pet-name-editable" id="petNameDisplay">${this.data.name}</div>
+
+                    <!-- Barra de progresso XP -->
+                    <div class="pet-progress-section">
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill" id="petXPFill" style="width: ${(this.data.xp / this.getXPForNextLevel()) * 100}%"></div>
+                        </div>
+                        <span class="progress-percentage">${Math.round((this.data.xp / this.getXPForNextLevel()) * 100)}%</span>
+                    </div>
+
+                    <!-- Visualização do mascote 3D -->
+                    <div class="pet-viewer-section">
+                        <div class="pet-message-bubble" id="petMessage"></div>
+                        <div class="pet-3d-container">
+                            <div class="pet-character" id="petCharacter">
+                                <!-- Modelo 3D carregado aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Habilidades -->
+                    <div class="pet-abilities-section">
+                        <h3 class="abilities-title">Habilidades</h3>
+                        <div class="abilities-grid" id="petActionsContainer">
+                            <button class="ability-btn" data-action="passive" title="Passiva">
+                                <span class="ability-emoji">⭐</span>
+                                <span class="ability-name">P</span>
+                            </button>
+                            <button class="ability-btn" data-action="q" title="Habilidade Q">
+                                <span class="ability-emoji">🔥</span>
+                                <span class="ability-name">Q</span>
+                            </button>
+                            <button class="ability-btn" data-action="w" title="Habilidade W">
+                                <span class="ability-emoji">💨</span>
+                                <span class="ability-name">W</span>
+                            </button>
+                            <button class="ability-btn" data-action="e" title="Habilidade E">
+                                <span class="ability-emoji">⚡</span>
+                                <span class="ability-name">E</span>
+                            </button>
+                            <button class="ability-btn" data-action="r" title="Habilidade R">
+                                <span class="ability-emoji">💥</span>
+                                <span class="ability-name">R</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Ações minimalistas -->
-                <div class="pet-actions-minimal" id="petActionsContainer">
-                    <button class="pet-action-btn-minimal" data-action="passive" title="Passiva">
-                        ⭐
+                <!-- Conquistas -->
+                <div class="pet-achievements-card">
+                    <button class="achievements-toggle" id="achievementsToggle">
+                        <span class="toggle-icon">🏆</span>
+                        <span class="toggle-text">Conquistas (${this.getUnlockedCount()})</span>
+                        <span class="toggle-arrow">▼</span>
                     </button>
-                    <button class="pet-action-btn-minimal" data-action="q" title="Habilidade Q">
-                        🔥
-                    </button>
-                    <button class="pet-action-btn-minimal" data-action="w" title="Habilidade W">
-                        💨
-                    </button>
-                    <button class="pet-action-btn-minimal" data-action="e" title="Habilidade E">
-                        ⚡
-                    </button>
-                    <button class="pet-action-btn-minimal" data-action="r" title="Habilidade R">
-                        💥
-                    </button>
-                </div>
-
-                <!-- Conquistas compactas -->
-                <details class="pet-achievements-minimal">
-                    <summary>🏆 Conquistas (${this.getUnlockedCount()})</summary>
-                    <div class="achievements-list-minimal" id="achievementsList">
+                    <div class="achievements-content" id="achievementsContent" style="display: none;">
                         ${this.renderAchievements()}
                     </div>
-                </details>
+                </div>
             </div>
         `;
 
@@ -431,7 +472,7 @@ class PetSystem {
 
     attachEventListeners() {
         // Botões de ação
-        const actionButtons = this.container.querySelectorAll('.pet-action-btn-minimal[data-action]');
+        const actionButtons = this.container.querySelectorAll('.ability-btn[data-action]');
         actionButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 const action = btn.dataset.action;
@@ -439,11 +480,23 @@ class PetSystem {
             });
         });
 
+        // Toggle de conquistas
+        const achievementsToggle = this.container.querySelector('#achievementsToggle');
+        const achievementsContent = this.container.querySelector('#achievementsContent');
+        const toggleArrow = this.container.querySelector('.toggle-arrow');
+        
+        achievementsToggle?.addEventListener('click', () => {
+            const isHidden = achievementsContent.style.display === 'none';
+            achievementsContent.style.display = isHidden ? 'block' : 'none';
+            toggleArrow.textContent = isHidden ? '▲' : '▼';
+        });
+
         // Ornn é o mascote padrão - sem upload necessário
 
-        // Editar nome (click no nome)
+        // Editar nome (click no botão de edição)
+        const editNameBtn = this.container.querySelector('#editNameBtn');
         const nameDisplay = this.container.querySelector('#petNameDisplay');
-        nameDisplay?.addEventListener('click', () => {
+        editNameBtn?.addEventListener('click', () => {
             const newName = prompt('Nome do mascote:', this.data.name);
             if (newName && newName.trim()) {
                 this.data.name = newName.trim();
@@ -476,7 +529,7 @@ class PetSystem {
         for (const [action, ability] of Object.entries(abilityMapping)) {
             if (ability && ability.icon) {
                 const button = document.createElement('button');
-                button.className = 'pet-action-btn-minimal ability-icon-btn';
+                button.className = 'ability-btn ability-icon-btn';
                 button.dataset.action = action;
                 button.title = ability.name || action;
                 

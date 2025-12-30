@@ -11,6 +11,7 @@ import { updateMenuIndicators } from './menu.js';
 import { saveWeeklyReport } from './reports.js';
 import { getDayName } from './utils.js';
 import { notifyActivityCompleted } from './pet-system.js';
+import AnimationManager from './animations.js';
 
 export function loadState() {
     const savedStartDate = localStorage.getItem('cycleStartDate');
@@ -132,6 +133,9 @@ export function initActivities() {
             const dayCard = checkbox.closest('.day-card');
             updateProgress(dayCard);
             saveCheckboxState();
+            
+            // Animar checkbox
+            AnimationManager.animateCheckbox(checkbox);
             
             // Notificar o mascote quando uma atividade é completada
             if (checkbox.checked) {
