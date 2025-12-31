@@ -9,8 +9,8 @@ export class SwipeGestures {
         this.touchStartY = 0;
         this.touchEndX = 0;
         this.touchEndY = 0;
-        this.minSwipeDistance = 50;
-        this.maxVerticalDistance = 100;
+        this.minSwipeDistance = 80; // Aumentado para reduzir sensibilidade
+        this.maxVerticalDistance = 50; // Reduzido para evitar swipes acidentais
         
         this.init();
     }
@@ -18,7 +18,7 @@ export class SwipeGestures {
     init() {
         this.setupSwipeToNavigate();
         this.setupSwipeToCloseModal();
-        this.setupPullToRefresh();
+        this.setupPullToRefresh(); // Reabilitado - funciona apenas no topo
     }
 
     /**
@@ -29,14 +29,23 @@ export class SwipeGestures {
         if (!mainContent) return;
 
         let touchstartX = 0;
+        let touchstartY = 0;
         let touchendX = 0;
+        let touchendY = 0;
 
         mainContent.addEventListener('touchstart', (e) => {
-            // Ignorar se estiver em um modal ou menu aberto
+            // Ignorar se estiver em um modal, menu aberto, pet-viewer ou canvas
             if (document.querySelector('.modal.active, .side-menu.active')) {
                 return;
             }
+            
+            // Ignorar se estiver tocando no pet-viewer ou canvas (mascote 3D)
+            if (e.target.closest('.pet-viewer, canvas')) {
+                return;
+            }
+            
             touchstartX = e.changedTouches[0].screenX;
+            touchstartY = e.changedTouches[0].screenY;
         }, { passive: true });
 
         mainContent.addEventListener('touchend', (e) => {
@@ -44,8 +53,22 @@ export class SwipeGestures {
                 return;
             }
             
+            // Ignorar se estiver tocando no pet-viewer ou canvas
+            if (e.target.closest('.pet-viewer, canvas')) {
+                return;
+            }
+            
             touchendX = e.changedTouches[0].screenX;
-            this.handleSwipeNavigation(touchstartX, touchendX);
+            touchendY = e.changedTouches[0].screenY;
+            
+            // Verificar se o movimento vertical é maior que o horizontal (scroll)
+            const horizontalDiff = Math.abs(touchendX - touchstartX);
+            const verticalDiff = Math.abs(touchendY - touchstartY);
+            
+            // Só fazer swipe se o movimento horizontal for maior que o vertical
+            if (horizontalDiff > verticalDiff && verticalDiff < this.maxVerticalDistance) {
+                this.handleSwipeNavigation(touchstartX, touchendX);
+            }
         }, { passive: true });
     }
 
