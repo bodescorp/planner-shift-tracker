@@ -9,14 +9,16 @@ export class Accessibility {
     }
 
     init() {
-        this.setupSkipLinks();
+        // Skip links removido - causava barra branca no topo
+        // this.setupSkipLinks();
         this.setupKeyboardNavigation();
         this.announcePageChanges();
     }
 
     /**
-     * Skip links para navegação por teclado
+     * Skip links para navegação por teclado - REMOVIDO
      */
+    /*
     setupSkipLinks() {
         const skipLink = document.createElement('a');
         skipLink.href = '#main-content';
@@ -25,6 +27,7 @@ export class Accessibility {
         skipLink.setAttribute('aria-label', 'Pular para o conteúdo principal');
         document.body.insertBefore(skipLink, document.body.firstChild);
     }
+    */
 
     /**
      * Atalhos de teclado

@@ -3,11 +3,14 @@
   "short_name": "Cronograma",
   "description": "Seu assistente pessoal para gerenciar rotina em escala 12x36 com atividades, meditação e lembretes de água",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "categories": ["productivity", "lifestyle", "health"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "src/assets/icon-192.svg",

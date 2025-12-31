@@ -168,13 +168,7 @@ export class SwipeGestures {
         const threshold = 100;
         const horizontalTolerance = 30;
 
-        const pullIndicator = document.createElement('div');
-        pullIndicator.className = 'pull-to-refresh-indicator';
-        pullIndicator.innerHTML = `
-            <div class="pull-spinner"></div>
-            <span class="pull-text">Puxe para atualizar</span>
-        `;
-        document.body.appendChild(pullIndicator);
+        // Sem indicador visual - pull-to-refresh discreto
 
         const resetPull = () => {
             canPull = false;
@@ -183,11 +177,6 @@ export class SwipeGestures {
             pullStartX = 0;
             pullMoveY = 0;
             pullMoveX = 0;
-            pullIndicator.style.transform = '';
-            pullIndicator.style.opacity = '0';
-            pullIndicator.classList.remove('ready');
-            pullIndicator.classList.remove('refreshing');
-            // Não resetar refreshTriggered aqui
         };
 
         document.addEventListener('touchstart', (e) => {
@@ -245,20 +234,7 @@ export class SwipeGestures {
                 isPulling = true;
             }
 
-            // Atualizar indicador
-            if (isPulling && pullMoveY < 250) {
-                const progress = Math.min(pullMoveY / threshold, 1);
-                pullIndicator.style.transform = `translateY(${Math.min(pullMoveY, threshold)}px)`;
-                pullIndicator.style.opacity = progress;
-                
-                if (progress >= 0.95) {
-                    pullIndicator.classList.add('ready');
-                    pullIndicator.querySelector('.pull-text').textContent = 'Solte para atualizar';
-                } else {
-                    pullIndicator.classList.remove('ready');
-                    pullIndicator.querySelector('.pull-text').textContent = 'Puxe para atualizar';
-                }
-            }
+            // Sem feedback visual - apenas detectar movimento
         }, { passive: true });
 
         document.addEventListener('touchend', (e) => {
@@ -276,9 +252,8 @@ export class SwipeGestures {
             // Verificar se atingiu o threshold e está no topo
             if (pullMoveY >= threshold && isAtTop) {
                 refreshTriggered = true;
-                pullIndicator.classList.add('refreshing');
-                pullIndicator.querySelector('.pull-text').textContent = 'Atualizando...';
                 
+                // Feedback tátil
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
                 }
@@ -286,7 +261,7 @@ export class SwipeGestures {
                 // Reload imediato
                 setTimeout(() => {
                     window.location.reload();
-                }, 200);
+                }, 150);
             } else {
                 resetPull();
             }
@@ -294,69 +269,9 @@ export class SwipeGestures {
     }
 }
 
-// CSS para Swipe Gestures
+// CSS para Swipe Gestures  
 const swipeStyles = `
-.pull-to-refresh-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 9999;
-    transform: translateY(-100px);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-}
-
-.pull-to-refresh-indicator.ready {
-    background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
-    border-bottom-color: rgba(16, 185, 129, 0.3);
-}
-
-.pull-to-refresh-indicator.refreshing .pull-spinner {
-    animation: spin 0.8s linear infinite;
-}
-
-.pull-spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-top-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-}
-
-.pull-to-refresh-indicator.ready .pull-spinner {
-    border-top-color: rgba(16, 185, 129, 1);
-}
-
-.pull-text {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85rem;
-    font-weight: 300;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .pull-to-refresh-indicator {
-        transition: none;
-    }
-    
-    .pull-spinner {
-        animation: none !important;
-    }
-}
+/* Pull-to-refresh sem indicador visual - removido */
 `;
 
 // Inject styles
