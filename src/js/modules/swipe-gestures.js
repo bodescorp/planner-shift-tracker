@@ -18,7 +18,7 @@ export class SwipeGestures {
     init() {
         this.setupSwipeToNavigate();
         this.setupSwipeToCloseModal();
-        this.setupPullToRefresh(); // Reabilitado - funciona apenas no topo
+        this.setupPullToRefresh();
     }
 
     /**
