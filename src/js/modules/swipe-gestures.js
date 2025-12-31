@@ -196,11 +196,6 @@ export class SwipeGestures {
                 refreshTriggered = false;
             }
 
-            // Só permitir no topo da página
-            if (window.scrollY !== 0) {
-                return;
-            }
-
             const target = e.target;
             
             // Ignorar elementos interativos
@@ -209,8 +204,13 @@ export class SwipeGestures {
                 return;
             }
 
-            // Verificar scroll interno
-            const scrollableParent = target.closest('.tab-content, .modal-content, .scrollable');
+            // Verificar scroll da janela
+            if (window.scrollY !== 0) {
+                return;
+            }
+
+            // Verificar scroll interno de containers com overflow
+            const scrollableParent = target.closest('.page-content, .tab-content, .modal-content, .scrollable');
             if (scrollableParent && scrollableParent.scrollTop > 0) {
                 return;
             }
@@ -230,8 +230,12 @@ export class SwipeGestures {
             pullMoveY = currentY - pullStartY;
             pullMoveX = Math.abs(currentX - pullStartX);
 
-            // Cancelar se movimento errado
-            if (pullMoveY <= 0 || pullMoveX > horizontalTolerance || window.scrollY > 0) {
+            // Verificar scroll do container
+            const scrollableParent = e.target.closest('.page-content, .tab-content, .modal-content, .scrollable');
+            
+            // Cancelar se movimento errado ou não está no topo
+            if (pullMoveY <= 0 || pullMoveX > horizontalTolerance || window.scrollY > 0 || 
+                (scrollableParent && scrollableParent.scrollTop > 0)) {
                 resetPull();
                 return;
             }
@@ -259,8 +263,12 @@ export class SwipeGestures {
 
         document.addEventListener('touchend', (e) => {
             if (!isPulling || refreshTriggered) {
-                resetPull();
-                return;
+                resetPull(croll do container
+            const scrollableParent = e.target.closest('.page-content, .tab-content, .modal-content, .scrollable');
+            const isAtTop = window.scrollY === 0 && (!scrollableParent || scrollableParent.scrollTop === 0);
+
+            // Verificar se atingiu o threshold e está no topo
+            if (pullMoveY >= threshold && isAtTop
             }
 
             // Verificar se atingiu o threshold e está no topo
@@ -307,17 +315,20 @@ const swipeStyles = `
     align-items: center;
     justify-content: center;
     gap: 12px;
-    background: rgba(0, 0, 0, 0.9);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 9999;
     transform: translateY(-100px);
     opacity: 0;
     transition: opacity 0.2s ease;
+    pointer-events: none;
 }
 
 .pull-to-refresh-indicator.ready {
-    background: rgba(16, 185, 129, 0.1);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border-bottom-color: rgba(16, 185, 129, 0.3);
 }
 
 .pull-to-refresh-indicator.refreshing .pull-spinner {

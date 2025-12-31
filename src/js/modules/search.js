@@ -18,6 +18,9 @@ export class SearchManager {
         const container = document.querySelector('.container');
         if (!container) return;
 
+        // Verificar se já existe para evitar duplicatas
+        if (document.querySelector('.search-bar')) return;
+
         const searchBar = document.createElement('div');
         searchBar.className = 'search-bar';
         searchBar.innerHTML = `
@@ -163,6 +166,22 @@ const searchStyles = `
 .search-bar {
     margin-bottom: 32px;
     animation: fadeInUp 0.4s ease;
+}
+
+/* Esconder search-bar nas páginas de Meditação e Mascote */
+.page-content .search-bar,
+.meditation-wrapper .search-bar,
+.pet-page-wrapper .search-bar {
+    display: none !important;
+}
+
+/* Mostrar apenas quando main-content está visível */
+.main-content .search-bar {
+    display: block;
+}
+
+.main-content.hidden .search-bar {
+    display: none !important;
 }
 
 @media (min-width: 769px) {
