@@ -271,9 +271,10 @@ export class SwipeGestures {
                     navigator.vibrate(50);
                 }
 
+                // Recarregar página imediatamente, forçando bypass do cache
                 setTimeout(() => {
-                    location.reload();
-                }, 800);
+                    window.location.reload();
+                }, 400);
             } else {
                 resetPull();
             }
