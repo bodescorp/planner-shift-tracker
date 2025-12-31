@@ -41,9 +41,15 @@ export class SearchManager {
             <div class="search-results-count" style="display: none;"></div>
         `;
 
-        const header = container.querySelector('header');
-        if (header) {
-            header.after(searchBar);
+        // Adicionar diretamente ao main-content ao invés de após o header
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            const firstChild = mainContent.firstChild;
+            if (firstChild) {
+                mainContent.insertBefore(searchBar, firstChild);
+            } else {
+                mainContent.appendChild(searchBar);
+            }
         }
 
         this.searchInput = document.getElementById('activity-search');
@@ -169,18 +175,16 @@ const searchStyles = `
 }
 
 /* Esconder search-bar nas páginas de Meditação e Mascote */
-.page-content .search-bar,
-.meditation-wrapper .search-bar,
-.pet-page-wrapper .search-bar {
+.pet-page .search-bar,
+.meditation-page .search-bar,
+#petPage .search-bar,
+#meditationPage .search-bar {
     display: none !important;
 }
 
-/* Mostrar apenas quando main-content está visível */
-.main-content .search-bar {
-    display: block;
-}
-
-.main-content.hidden .search-bar {
+/* Garantir que não seja exibida quando main-content está oculto */
+.main-content.hidden ~ .search-bar,
+.page-content:not(.main-content) .search-bar {
     display: none !important;
 }
 

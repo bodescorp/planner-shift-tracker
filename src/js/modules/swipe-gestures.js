@@ -269,7 +269,9 @@ export class SwipeGestures {
 
             // Verificar scroll do container
             const scrollableParent = e.target.closest('.page-content, .tab-content, .modal-content, .scrollable');
-            const isAtTop = window.scrollY === 0 && (!scrollableParent || scrollableParent.scrollTop === 0);
+            const windowAtTop = window.scrollY === 0;
+            const containerAtTop = !scrollableParent || scrollableParent.scrollTop === 0;
+            const isAtTop = windowAtTop && containerAtTop;
 
             // Verificar se atingiu o threshold e está no topo
             if (pullMoveY >= threshold && isAtTop) {
@@ -281,21 +283,10 @@ export class SwipeGestures {
                     navigator.vibrate(50);
                 }
 
-                // Tentar diferentes métodos de reload
+                // Reload imediato
                 setTimeout(() => {
-                    try {
-                        // Método 1: Hard reload
-                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                            // Notificar service worker para fazer bypass
-                            navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-                        }
-                        // Método 2: Reload forçado
-                        window.location.reload();
-                    } catch (error) {
-                        // Fallback: reload simples
-                        window.location.href = window.location.href;
-                    }
-                }, 300);
+                    window.location.reload();
+                }, 200);
             } else {
                 resetPull();
             }
