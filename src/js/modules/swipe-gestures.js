@@ -165,8 +165,8 @@ export class SwipeGestures {
         let refreshTriggered = false;
         let canPull = false;
         let isPulling = false;
-        const threshold = 120;
-        const horizontalTolerance = 30; // Máximo movimento horizontal permitido
+        const threshold = 100;
+        const horizontalTolerance = 30;
 
         const pullIndicator = document.createElement('div');
         pullIndicator.className = 'pull-to-refresh-indicator';
@@ -186,34 +186,36 @@ export class SwipeGestures {
             pullIndicator.style.transform = '';
             pullIndicator.style.opacity = '0';
             pullIndicator.classList.remove('ready');
+            pullIndicator.classList.remove('refreshing');
+            // Não resetar refreshTriggered aqui
         };
 
         document.addEventListener('touchstart', (e) => {
-            // Verificações rigorosas para permitir pull
+            // Resetar flag de refresh em novo touch
+            if (refreshTriggered) {
+                refreshTriggered = false;
+            }
+
+            // Só permitir no topo da página
             if (window.scrollY !== 0) {
-                resetPull();
                 return;
             }
 
             const target = e.target;
             
-            // Ignorar se está em modal, menu ou elementos interativos
+            // Ignorar elementos interativos
             if (document.querySelector('.modal.active, .side-menu.active') ||
                 target.closest('button, a, input, select, textarea, .pet-viewer, canvas')) {
-                resetPull();
                 return;
             }
 
-            // Verificar elementos com scroll próprio
+            // Verificar scroll interno
             const scrollableParent = target.closest('.tab-content, .modal-content, .scrollable');
             if (scrollableParent && scrollableParent.scrollTop > 0) {
-                resetPull();
                 return;
             }
 
-            // Permitir pull apenas se todas as condições forem atendidas
             canPull = true;
-            isPulling = false;
             pullStartY = e.touches[0].clientY;
             pullStartX = e.touches[0].clientX;
         }, { passive: true });
@@ -228,30 +230,24 @@ export class SwipeGestures {
             pullMoveY = currentY - pullStartY;
             pullMoveX = Math.abs(currentX - pullStartX);
 
-            // Se está rolando para cima ou muito na horizontal, cancela
-            if (pullMoveY <= 0 || pullMoveX > horizontalTolerance) {
+            // Cancelar se movimento errado
+            if (pullMoveY <= 0 || pullMoveX > horizontalTolerance || window.scrollY > 0) {
                 resetPull();
                 return;
             }
 
-            // Se saiu do topo, cancela
-            if (window.scrollY > 0) {
-                resetPull();
-                return;
-            }
-
-            // Só ativa pulling após movimento vertical significativo
-            if (pullMoveY > 30 && pullMoveX < horizontalTolerance) {
+            // Ativar pulling
+            if (pullMoveY > 20 && pullMoveX < horizontalTolerance) {
                 isPulling = true;
             }
 
-            // Atualizar UI do indicador (sem preventDefault)
+            // Atualizar indicador
             if (isPulling && pullMoveY < 250) {
                 const progress = Math.min(pullMoveY / threshold, 1);
                 pullIndicator.style.transform = `translateY(${Math.min(pullMoveY, threshold)}px)`;
                 pullIndicator.style.opacity = progress;
                 
-                if (progress >= 0.9) {
+                if (progress >= 0.95) {
                     pullIndicator.classList.add('ready');
                     pullIndicator.querySelector('.pull-text').textContent = 'Solte para atualizar';
                 } else {
@@ -259,10 +255,16 @@ export class SwipeGestures {
                     pullIndicator.querySelector('.pull-text').textContent = 'Puxe para atualizar';
                 }
             }
-        }, { passive: true }); // Mudado para passive: true
+        }, { passive: true });
 
-        document.addEventListener('touchend', () => {
-            if (isPulling && pullMoveY >= threshold && !refreshTriggered && window.scrollY === 0) {
+        document.addEventListener('touchend', (e) => {
+            if (!isPulling || refreshTriggered) {
+                resetPull();
+                return;
+            }
+
+            // Verificar se atingiu o threshold e está no topo
+            if (pullMoveY >= threshold && window.scrollY === 0) {
                 refreshTriggered = true;
                 pullIndicator.classList.add('refreshing');
                 pullIndicator.querySelector('.pull-text').textContent = 'Atualizando...';
@@ -271,10 +273,21 @@ export class SwipeGestures {
                     navigator.vibrate(50);
                 }
 
-                // Recarregar página imediatamente, forçando bypass do cache
+                // Tentar diferentes métodos de reload
                 setTimeout(() => {
-                    window.location.reload();
-                }, 400);
+                    try {
+                        // Método 1: Hard reload
+                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                            // Notificar service worker para fazer bypass
+                            navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                        // Método 2: Reload forçado
+                        window.location.reload();
+                    } catch (error) {
+                        // Fallback: reload simples
+                        window.location.href = window.location.href;
+                    }
+                }, 300);
             } else {
                 resetPull();
             }
