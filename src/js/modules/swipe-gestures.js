@@ -263,16 +263,16 @@ export class SwipeGestures {
 
         document.addEventListener('touchend', (e) => {
             if (!isPulling || refreshTriggered) {
-                resetPull(croll do container
+                resetPull();
+                return;
+            }
+
+            // Verificar scroll do container
             const scrollableParent = e.target.closest('.page-content, .tab-content, .modal-content, .scrollable');
             const isAtTop = window.scrollY === 0 && (!scrollableParent || scrollableParent.scrollTop === 0);
 
             // Verificar se atingiu o threshold e está no topo
-            if (pullMoveY >= threshold && isAtTop
-            }
-
-            // Verificar se atingiu o threshold e está no topo
-            if (pullMoveY >= threshold && window.scrollY === 0) {
+            if (pullMoveY >= threshold && isAtTop) {
                 refreshTriggered = true;
                 pullIndicator.classList.add('refreshing');
                 pullIndicator.querySelector('.pull-text').textContent = 'Atualizando...';
