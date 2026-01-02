@@ -1630,7 +1630,7 @@ h1 {
     }
 
     .menu-toggle {
-        top: 30px; /* Ajustado para descer após remoção do skip link */
+        top: 45px; /* Espaçamento maior após remoção do skip link */
         left: 15px;
         width: 45px;
         height: 45px;
