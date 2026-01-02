@@ -1040,6 +1040,18 @@
     .pet-settings-content {
         margin: 0 12px;
     }
+
+    /* Espaçamento no topo para páginas especiais no mobile */
+    #notesPage .page-header,
+    #meditationPage .meditation-wrapper,
+    #petPage .pet-page-wrapper {
+        padding-top: 32px;
+    }
+
+    /* Ajuste específico para o cabeçalho de notas */
+    #notesPage .page-header {
+        margin-bottom: 20px;
+    }
 }
 
 /* Preferência de movimento reduzido */

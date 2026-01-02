@@ -1598,6 +1598,12 @@ h1 {
     body {
         padding: 10px;
         padding-bottom: 75px; /* Espaço para o menu de abas */
+        padding-top: 20px; /* Espaço extra no topo após remoção do skip link */
+    }
+
+    header {
+        margin-top: 25px; /* Espaçamento adicional no topo */
+        margin-bottom: 40px;
     }
 
     h1 {
@@ -1624,7 +1630,7 @@ h1 {
     }
 
     .menu-toggle {
-        top: 15px;
+        top: 30px; /* Ajustado para descer após remoção do skip link */
         left: 15px;
         width: 45px;
         height: 45px;
